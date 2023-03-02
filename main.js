@@ -1,7 +1,7 @@
-const VIEWPORT_HEIGHT = 600;
-const VIEWPORT_WIDTH = 800;
+const VIEWPORT_HEIGHT = 400;
+const VIEWPORT_WIDTH = 600;
 const ELEMENT_SIZE = 20;
-const GRID_SIZE = 100;
+const GRID_SIZE = 200;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
@@ -30,7 +30,9 @@ function generateMap(grid) {
     createRoom(grid);
     createRoom(grid);
     createRoom(grid);
-
+    createRoom(grid);
+    createRoom(grid);
+    createRoom(grid);
     createRoom(grid);
 }
 
@@ -48,11 +50,9 @@ function createRoom(grid) {
 
     for (var x = startX; x < startX + width; x++) {
         for (var y = startY; y < startY + height; y++) {
-            //  if (grid[x][y].char == ' ')
             grid[x][y] = {
                 char: ' ',
-                x: x,
-                y: y
+                visited: false
             }
         }
     }
@@ -66,8 +66,6 @@ function initGrid() {
         for (var j = 0; j < GRID_SIZE; j++)
             newGrid[i][j] = {
                 char: charMap.get('wall'),
-                x: i,
-                y: j,
                 visited: false,
             }
     }
@@ -78,18 +76,29 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
+   
+    if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
+    if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
+
     let gridSection = [];
     for (var x = 0; x < elementsWide; x++) {
         gridSection[x] = [];
         for (var y = 0; y < elementsHigh; y++)
+        if (centerObject.x == startX + x && centerObject.y == startY + y) {
+            gridSection[x][y] = {
+                char: charMap.get('player'),
+            }
+        } else {
             gridSection[x][y] = grid[startX + x][startY + y];
+        }
+            
     }
     return gridSection;
 }
 
 function updateView(player, grid) {
     drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
-    drawAgents(player);
+    //drawAgents(player);
 }
 
 function drawGrid(grid) {

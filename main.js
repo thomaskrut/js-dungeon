@@ -1,6 +1,7 @@
-const HEIGHT = 600;
-const WIDTH = 800;
+const VIEWPORT_HEIGHT = 600;
+const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
+const GRID_SIZE = 100;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
@@ -10,17 +11,17 @@ const charMap = new Map();
 charMap.set('wall', '\u25A7').set('player', '@');
 
 const player = {
-    x: 20,
-    y: 20
+    x: 1,
+    y: 1
 };
 
-var grid = fillGrid();
+var grid = initGrid();
 
 generateMap(grid);
 
 initKeyListener();
 
-updateView();
+updateView(player, getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
 
 function generateMap(grid) {
     createRoom(grid);
@@ -35,12 +36,12 @@ function generateMap(grid) {
 
 function createRoom(grid) {
 
-    const startX = 2 + getRandom(WIDTH / ELEMENT_SIZE)
-    const startY = 2 + getRandom(HEIGHT / ELEMENT_SIZE);
+    const startX = 2 + getRandom(GRID_SIZE)
+    const startY = 2 + getRandom(GRID_SIZE);
     const width = getRandom(15) + 5;
     const height = getRandom(15) + 5;
 
-    if (startX + width > (WIDTH / ELEMENT_SIZE) - 1 || startY + height > (HEIGHT / ELEMENT_SIZE) - 1) {
+    if (startX + width > GRID_SIZE - 1 || startY + height > GRID_SIZE - 1) {
         createRoom(grid);
         return;
     }
@@ -58,11 +59,11 @@ function createRoom(grid) {
 
 }
 
-function fillGrid() {
+function initGrid() {
     let newGrid = [];
-    for (var i = 0; i < WIDTH / ELEMENT_SIZE; i++) {
+    for (var i = 0; i < GRID_SIZE; i++) {
         newGrid[i] = [];
-        for (var j = 0; j < HEIGHT / ELEMENT_SIZE; j++)
+        for (var j = 0; j < GRID_SIZE; j++)
             newGrid[i][j] = {
                 char: charMap.get('wall'),
                 x: i,
@@ -73,23 +74,42 @@ function fillGrid() {
     return newGrid;
 }
 
-function updateView() {
+function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
+
+    let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
+    let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
+    let gridSection = [];
+    for (var x = 0; x < elementsWide; x++) {
+        gridSection[x] = [];
+        for (var y = 0; y < elementsHigh; y++)
+            gridSection[x][y] = grid[startX + x][startY + y];
+    }
+    return gridSection;
+}
+
+function updateView(player, grid) {
+    drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
+    drawAgents(player);
+}
+
+function drawGrid(grid) {
     ctx.fillStyle = "black";
     ctx.font = "22px courier";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     ctx.fillStyle = "white";
 
-    grid.forEach((row) => {
-
-        row.forEach(element => {
-            ctx.fillText(element.char, element.x * ELEMENT_SIZE, element.y * ELEMENT_SIZE)
-        })
-
-
-    });
-
-    ctx.fillText(charMap.get('player'), player.x * ELEMENT_SIZE, player.y * ELEMENT_SIZE);
+    for (var x = 0; x < VIEWPORT_WIDTH / ELEMENT_SIZE; x++) {
+        for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
+            ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE)
+        }
+    }
 }
+
+function drawAgents(player) {
+    ctx.fillText(charMap.get('player'), (player.x) * ELEMENT_SIZE , (player.y) * ELEMENT_SIZE);
+}
+
+
 
 function initKeyListener() {
 
@@ -134,7 +154,7 @@ function initKeyListener() {
         }
         console.log(event.key);
 
-        updateView();
+        updateView(player, grid);
 
         // Cancel the default action to avoid it being handled twice
         event.preventDefault();

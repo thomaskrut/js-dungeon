@@ -46,9 +46,9 @@ function createRoom(grid) {
         return;
     }
 
-    for(var x = startX; x < startX + width; x++) {
+    for (var x = startX; x < startX + width; x++) {
         for (var y = startY; y < startY + height; y++) {
-          //  if (grid[x][y].char == ' ')
+            //  if (grid[x][y].char == ' ')
             grid[x][y] = {
                 char: ' ',
                 x: x,
@@ -106,10 +106,10 @@ function drawGrid(grid) {
 }
 
 function drawAgents(player) {
-    ctx.fillText(charMap.get('player'), (player.x) * ELEMENT_SIZE , (player.y) * ELEMENT_SIZE);
+    let playerX = (player.x > VIEWPORT_WIDTH / ELEMENT_SIZE / 2) ? VIEWPORT_WIDTH / ELEMENT_SIZE / 2 : player.x;
+    let playerY = (player.y > VIEWPORT_HEIGHT / ELEMENT_SIZE / 2) ? VIEWPORT_HEIGHT / ELEMENT_SIZE / 2 : player.y;
+    ctx.fillText(charMap.get('player'), playerX * ELEMENT_SIZE, playerY * ELEMENT_SIZE);
 }
-
-
 
 function initKeyListener() {
 

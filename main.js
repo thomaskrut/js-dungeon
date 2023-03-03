@@ -141,22 +141,42 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
     let gridSection = [];
     for (var x = 0; x < elementsWide; x++) {
         gridSection[x] = [];
-        for (var y = 0; y < elementsHigh; y++)
-            if (checkOverlap(centerObject, { x: x + startX, y: y + startY })) {
-                gridSection[x][y] = {
-                    char: charMap.get('player'),
-                }
-            } else {
-                gridSection[x][y] = grid[startX + x][startY + y];
-            }
-
+        for (var y = 0; y < elementsHigh; y++) {
+            gridSection[x][y] = grid[startX + x][startY + y];
+        }
     }
+    gridSection[centerObject.x - startX][centerObject.y - startY] = {
+        char: charMap.get('player'),
+    }
+
+
     return gridSection;
 }
 
 function updateView(player, grid) {
     drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
 
+}
+
+function drawLitArea(grid, startingPoint, step) {
+
+    if (step == 5) return;
+    let x = startingPoint.x;
+    let y = startingPoint.y;
+    grid[x][y].visited = true;
+    ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+    if (grid[x][y].char != charMap.get('wall')) {
+        drawLitArea(grid, { x: x + 1, y: y }, step + 1);
+        drawLitArea(grid, { x: x - 1, y: y }, step + 1);
+        drawLitArea(grid, { x: x, y: y + 1 }, step + 1);
+        drawLitArea(grid, { x: x, y: y - 1 }, step + 1);
+
+        drawLitArea(grid, { x: x - 1, y: y - 1 }, step + 1);
+        drawLitArea(grid, { x: x + 1, y: y - 1 }, step + 1);
+        drawLitArea(grid, { x: x - 1, y: y + 1 }, step + 1);
+        drawLitArea(grid, { x: x + 1, y: y + 1 }, step + 1);
+    }
+    
 }
 
 function drawGrid(grid) {
@@ -167,7 +187,13 @@ function drawGrid(grid) {
 
     for (var x = 0; x < VIEWPORT_WIDTH / ELEMENT_SIZE; x++) {
         for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
-            ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE)
+
+            if (grid[x][y].char == charMap.get('player')) {
+
+                drawLitArea(grid, { x: x, y: y }, 1);
+            }
+
+            if (grid[x][y].visited) ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
         }
     }
 }

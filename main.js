@@ -15,8 +15,8 @@ const messagesContext = messages.getContext("2d");
 const charMap = new Map();
 
 const messagesQueue = [];
-
 const recentMessages = [];
+const messagesColour = ["white", "silver", "gray", "dimgray"];
 
 charMap.set('wall', '\u25A7').set('player', '@').set('coin', '$')
 
@@ -34,25 +34,26 @@ updateMapView(player, grid);
 
 generateMessage("Welcome!");
 
-updateMessages();
+drawMessages();
 
 function generateMessage(message) {
     messagesQueue.unshift(message);
 }
 
-function updateMessages() {
+function drawMessages() {
     if (messagesQueue.length > 0) {
-        if (recentMessages.length > 2) recentMessages.pop();
+        if (recentMessages.length > 3) recentMessages.pop();
         recentMessages.unshift(messagesQueue.pop())
     }
     messagesContext.fillStyle = "black";
-    messagesContext.font = "22px courier";
+    messagesContext.font = "16px courier";
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
-    messagesContext.fillStyle = "silver";
-    for (let i=0; i < recentMessages.length; i++) {
+    
+    for (let i = 0; i < recentMessages.length; i++) {
+        messagesContext.fillStyle = messagesColour[i];
         messagesContext.fillText(recentMessages[i], 10, (i + 1) * 20);
     }
-    
+
 }
 
 function generateItem(item) {
@@ -66,7 +67,7 @@ function generateItem(item) {
             y: point.y,
             value: getRandom(500) + 5,
             char: charMap.get('coin'),
-            pickUp: function() {
+            pickUp: function () {
                 generateMessage("You found " + this.value + " gold!")
                 removeItem(this);
             }
@@ -77,7 +78,7 @@ function generateItem(item) {
 function removeItem(item) {
     grid[item.x][item.y].char = ' ';
     items.splice(items.indexOf(item), 1);
-    
+
 }
 
 function generateItemsArray() {
@@ -122,7 +123,7 @@ function playerCommand(command) {
         })
 
     }
-    updateMessages();
+    drawMessages();
 }
 
 function generateMap(grid) {
@@ -134,7 +135,7 @@ function generateMap(grid) {
     for (let i = 0; i < numberOfIterations; i++) {
         createRoom(grid, getEmptyPoint(grid));
         createRoom(grid, getEmptyPoint(grid));
-        createRoom(grid, getEmptyPoint(grid));
+        
         createPassage(grid, getEmptyPoint(grid));
     }
 
@@ -185,8 +186,8 @@ function createRoom(grid, startingPoint) {
 
     const startX = startingPoint.x;
     const startY = startingPoint.y;
-    const width = getRandom(15) + 5;
-    const height = getRandom(15) + 5;
+    const width = getRandom(10) + 5;
+    const height = getRandom(10) + 5;
 
     if (startX + width > GRID_SIZE - 1 || startY + height > GRID_SIZE - 1) {
         createRoom(grid, getEmptyPoint(grid));

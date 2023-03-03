@@ -23,6 +23,16 @@ updateView(player, grid);
 function generateMap(grid) {
 
     createRoom(grid, {x: GRID_SIZE / 2, y: GRID_SIZE / 2})
+    
+    const numberOfIterations = getRandom(5) + 5;
+
+    for (let i = 0; i < numberOfIterations; i++) {
+        createRoom(grid, getEmptyPoint(grid));
+        createRoom(grid, getEmptyPoint(grid));
+        createPassage(grid, getEmptyPoint(grid));
+    }
+
+    
 
 }
 
@@ -43,13 +53,13 @@ function getEmptyPoint(grid) {
     }
 }
 
-function createPassage(grid) {
-    let x = 2 + getRandom(GRID_SIZE)
-    let y = 2 + getRandom(GRID_SIZE);
+function createPassage(grid, startingPoint) {
+    let x = startingPoint.x;
+    let y = startingPoint.y;
     let direction = getRandomDirection();
 
-    while(x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2) {
-        while(getRandom(15) != 0) {
+    while(x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
+        while(getRandom(5) != 0) {
             grid[x][y] = {
                 char: ' ',
                 visited: false

@@ -3,7 +3,7 @@ const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-let litAreaSize = 6;
+let litAreaSize = 8;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
@@ -84,7 +84,8 @@ function createPassage(grid, startingPoint) {
         while (getRandom(5) != 0) {
             grid[x][y] = {
                 char: ' ',
-                visited: false
+                visited: false,
+                lit: false
             }
             x = x + direction.modX;
             y = y + direction.modY;
@@ -112,7 +113,8 @@ function createRoom(grid, startingPoint) {
         for (var y = startY; y < startY + height; y++) {
             grid[x][y] = {
                 char: ' ',
-                visited: false
+                visited: false,
+                lit: false
             }
         }
     }
@@ -127,6 +129,7 @@ function initGrid() {
             newGrid[i][j] = {
                 char: charMap.get('wall'),
                 visited: false,
+                lit: false
             }
     }
     return newGrid;
@@ -134,9 +137,10 @@ function initGrid() {
 
 function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
-    let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
-    let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
-
+    const startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
+    const startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
+    const playerX = centerObject.x - startX;
+    const playerY = centerObject.y - startY;
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
     if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
 
@@ -145,12 +149,25 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
         gridSection[x] = [];
         for (var y = 0; y < elementsHigh; y++) {
             gridSection[x][y] = grid[startX + x][startY + y];
+            gridSection[x][y].lit = false;
         }
     }
-    gridSection[centerObject.x - startX][centerObject.y - startY] = {
+
+    
+
+    gridSection[playerX][playerY] = {
         char: charMap.get('player'),
+        lit: true
     }
 
+    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 0, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 0, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 0, 1, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 0, -1, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 1, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 1, -1, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 1, 1);
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, -1, 1);
 
     return gridSection;
 }
@@ -160,16 +177,15 @@ function updateView(player, grid) {
 
 }
 
-function drawLitArea(grid, startingPoint, modX, modY, step) {
+function createLitArea(grid, startingPoint, modX, modY, step) {
     let x = startingPoint.x + modX;
     let y = startingPoint.y + modY;
     if (step == litAreaSize) return;
-    ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-    
+    grid[x][y].lit = true;
     grid[x][y].visited = true;
 
     if (grid[x][y].char != charMap.get('wall')) {
-        drawLitArea(grid, { x: x, y: y }, modX, modY, step + 1);
+        createLitArea(grid, { x: x, y: y }, modX, modY, step + 1);
     }
 
 }
@@ -183,19 +199,14 @@ function drawGrid(grid) {
     for (var x = 0; x < VIEWPORT_WIDTH / ELEMENT_SIZE; x++) {
         for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
 
-            if (grid[x][y].char == charMap.get('player')) {
+            if (grid[x][y].lit) {
+                ctx.fillStyle = 'silver';
                 ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-                drawLitArea(grid, { x: x, y: y }, 1, 0, 1);
-                drawLitArea(grid, { x: x, y: y }, -1, 0, 1);
-                drawLitArea(grid, { x: x, y: y }, 0, 1, 1);
-                drawLitArea(grid, { x: x, y: y }, 0, -1, 1);
-                drawLitArea(grid, { x: x, y: y }, 1, 1, 1);
-                drawLitArea(grid, { x: x, y: y }, 1, -1, 1);
-                drawLitArea(grid, { x: x, y: y }, -1, 1, 1);
-                drawLitArea(grid, { x: x, y: y }, -1, -1, 1);
             }
-
-            if (grid[x][y].visited) ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+            else if (grid[x][y].visited) {
+                ctx.fillStyle = 'gray';
+                ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+            }
         }
     }
 }

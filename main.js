@@ -1,12 +1,16 @@
-const VIEWPORT_HEIGHT = 600;
+const VIEWPORT_HEIGHT = 400;
+const MESSAGES_HEIGHT = 100;
 const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
 let litAreaSize = 10;
 
-const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext("2d");
+const mapView = document.getElementById('mapView');
+const messages = document.getElementById('messages');
+
+const mapViewContext = mapView.getContext("2d");
+const messagesContext = messages.getContext("2d");
 
 const charMap = new Map();
 
@@ -24,7 +28,17 @@ const items = generateItemsArray();
 
 initKeyListener();
 
-updateView(player, grid);
+updateMapView(player, grid);
+
+updateMessages();
+
+function updateMessages(message) {
+    messagesContext.fillStyle = "black";
+    messagesContext.font = "22px system-ui";
+    messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
+    messagesContext.fillStyle = "white";
+    messagesContext.fillText(message, 10, 30);
+}
 
 function generateItem(item) {
 
@@ -35,9 +49,20 @@ function generateItem(item) {
         case 'coin': return {
             x: point.x,
             y: point.y,
-            char: charMap.get('coin')
+            value: getRandom(500) + 5,
+            char: charMap.get('coin'),
+            pickUp: function() {
+                updateMessages("You found " + this.value + " gold!")
+                removeItem(this);
+            }
         }
     }
+}
+
+function removeItem(item) {
+    grid[item.x][item.y].char = ' ';
+    items.splice(items.indexOf(item), 1);
+    
 }
 
 function generateItemsArray() {
@@ -72,10 +97,17 @@ function playerCommand(command) {
         if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
             player.x += modX;
             player.y += modY;
-            updateView(player, grid);
+            updateMapView(player, grid);
         }
 
+        items.forEach(i => {
+            if (checkOverlap(i, player)) {
+                i.pickUp();
+            }
+        })
+
     }
+    console.log(items.length);
 }
 
 function generateMap(grid) {
@@ -172,16 +204,19 @@ function initGrid() {
     return newGrid;
 }
 
-function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
+function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
 
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
     if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
+
     const playerX = centerObject.x - startX;
     const playerY = centerObject.y - startY;
+
     let gridSection = [];
+
     for (var x = 0; x < elementsWide; x++) {
         gridSection[x] = [];
         for (var y = 0; y < elementsHigh; y++) {
@@ -213,8 +248,8 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
     return gridSection;
 }
 
-function updateView(player, grid) {
-    drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
+function updateMapView(player, grid) {
+    drawGridSection(createGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
 
 }
 
@@ -239,23 +274,23 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
 
 }
 
-function drawGrid(grid) {
-    ctx.fillStyle = "black";
-    ctx.font = "22px system-ui";
-    ctx.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    ctx.fillStyle = "white";
+function drawGridSection(gridSection) {
+    mapViewContext.fillStyle = "black";
+    mapViewContext.font = "22px system-ui";
+    mapViewContext.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+    mapViewContext.fillStyle = "white";
 
     for (var x = 0; x < VIEWPORT_WIDTH / ELEMENT_SIZE; x++) {
         for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
 
-            if (grid[x][y].lit) {
-                ctx.fillStyle = 'silver';
-                ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+            if (gridSection[x][y].lit) {
+                mapViewContext.fillStyle = 'silver';
+                mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
 
             }
-            else if (grid[x][y].visited) {
-                ctx.fillStyle = 'gray';
-                ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+            else if (gridSection[x][y].visited) {
+                mapViewContext.fillStyle = 'gray';
+                mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
             }
         }
     }
@@ -264,7 +299,6 @@ function drawGrid(grid) {
 function checkOverlap(object1, object2) {
     return (object1.x == object2.x && object1.y == object2.y);
 }
-
 
 function initKeyListener() {
 

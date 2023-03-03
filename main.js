@@ -3,6 +3,8 @@ const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
+let litAreaSize = 6;
+
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
 
@@ -58,10 +60,10 @@ function generateMap(grid) {
 
 function getRandomDirection() {
     switch (getRandom(4)) {
-        case 0: return { dirX: 1, dirY: 0 }
-        case 1: return { dirX: -1, dirY: 0 }
-        case 2: return { dirX: 0, dirY: 1 }
-        case 3: return { dirX: 0, dirY: -1 }
+        case 0: return { modX: 1, modY: 0 }
+        case 1: return { modX: -1, modY: 0 }
+        case 2: return { modX: 0, modY: 1 }
+        case 3: return { modX: 0, modY: -1 }
     }
 }
 
@@ -84,8 +86,8 @@ function createPassage(grid, startingPoint) {
                 char: ' ',
                 visited: false
             }
-            x = x + direction.dirX;
-            y = y + direction.dirY;
+            x = x + direction.modX;
+            y = y + direction.modY;
             if (x < 2 || x > GRID_SIZE - 2 || y < 2 || y > GRID_SIZE - 2) break;
         }
         direction = getRandomDirection();
@@ -159,17 +161,17 @@ function updateView(player, grid) {
 }
 
 function drawLitArea(grid, startingPoint, modX, modY, step) {
-
-    if (step == 7) return;
-    let x = startingPoint.x;
-    let y = startingPoint.y;
-    grid[x][y].visited = true;
+    let x = startingPoint.x + modX;
+    let y = startingPoint.y + modY;
+    if (step == litAreaSize) return;
     ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-    if (grid[x][y].char != charMap.get('wall')) {
-        drawLitArea(grid, { x: x + modX, y: y + modY }, modX, modY, step + 1);
-     
-    }
     
+    grid[x][y].visited = true;
+
+    if (grid[x][y].char != charMap.get('wall')) {
+        drawLitArea(grid, { x: x, y: y }, modX, modY, step + 1);
+    }
+
 }
 
 function drawGrid(grid) {
@@ -182,7 +184,7 @@ function drawGrid(grid) {
         for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
 
             if (grid[x][y].char == charMap.get('player')) {
-
+                ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
                 drawLitArea(grid, { x: x, y: y }, 1, 0, 1);
                 drawLitArea(grid, { x: x, y: y }, -1, 0, 1);
                 drawLitArea(grid, { x: x, y: y }, 0, 1, 1);

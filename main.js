@@ -1,10 +1,10 @@
-const VIEWPORT_HEIGHT = 400;
+const VIEWPORT_HEIGHT = 480;
 const MESSAGES_HEIGHT = 100;
 const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-let litAreaSize = 10;
+let litAreaSize = 6;
 
 const mapView = document.getElementById('mapView');
 const messages = document.getElementById('messages');
@@ -14,7 +14,9 @@ const messagesContext = messages.getContext("2d");
 
 const charMap = new Map();
 
+const messagesQueue = [];
 
+const recentMessages = [];
 
 charMap.set('wall', '\u25A7').set('player', '@').set('coin', '$')
 
@@ -30,14 +32,27 @@ initKeyListener();
 
 updateMapView(player, grid);
 
+generateMessage("Welcome!");
+
 updateMessages();
 
-function updateMessages(message) {
+function generateMessage(message) {
+    messagesQueue.unshift(message);
+}
+
+function updateMessages() {
+    if (messagesQueue.length > 0) {
+        if (recentMessages.length > 2) recentMessages.pop();
+        recentMessages.unshift(messagesQueue.pop())
+    }
     messagesContext.fillStyle = "black";
-    messagesContext.font = "22px system-ui";
+    messagesContext.font = "22px courier";
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
-    messagesContext.fillStyle = "white";
-    messagesContext.fillText(message, 10, 30);
+    messagesContext.fillStyle = "silver";
+    for (let i=0; i < recentMessages.length; i++) {
+        messagesContext.fillText(recentMessages[i], 10, (i + 1) * 20);
+    }
+    
 }
 
 function generateItem(item) {
@@ -52,7 +67,7 @@ function generateItem(item) {
             value: getRandom(500) + 5,
             char: charMap.get('coin'),
             pickUp: function() {
-                updateMessages("You found " + this.value + " gold!")
+                generateMessage("You found " + this.value + " gold!")
                 removeItem(this);
             }
         }
@@ -107,7 +122,7 @@ function playerCommand(command) {
         })
 
     }
-    console.log(items.length);
+    updateMessages();
 }
 
 function generateMap(grid) {
@@ -276,7 +291,7 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
 
 function drawGridSection(gridSection) {
     mapViewContext.fillStyle = "black";
-    mapViewContext.font = "22px system-ui";
+    mapViewContext.font = "22px courier";
     mapViewContext.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     mapViewContext.fillStyle = "white";
 

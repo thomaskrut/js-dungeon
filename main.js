@@ -158,23 +158,16 @@ function updateView(player, grid) {
 
 }
 
-function drawLitArea(grid, startingPoint, step) {
+function drawLitArea(grid, startingPoint, modX, modY, step) {
 
-    if (step == 5) return;
+    if (step == 7) return;
     let x = startingPoint.x;
     let y = startingPoint.y;
     grid[x][y].visited = true;
     ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
     if (grid[x][y].char != charMap.get('wall')) {
-        drawLitArea(grid, { x: x + 1, y: y }, step + 1);
-        drawLitArea(grid, { x: x - 1, y: y }, step + 1);
-        drawLitArea(grid, { x: x, y: y + 1 }, step + 1);
-        drawLitArea(grid, { x: x, y: y - 1 }, step + 1);
-
-        drawLitArea(grid, { x: x - 1, y: y - 1 }, step + 1);
-        drawLitArea(grid, { x: x + 1, y: y - 1 }, step + 1);
-        drawLitArea(grid, { x: x - 1, y: y + 1 }, step + 1);
-        drawLitArea(grid, { x: x + 1, y: y + 1 }, step + 1);
+        drawLitArea(grid, { x: x + modX, y: y + modY }, modX, modY, step + 1);
+     
     }
     
 }
@@ -190,7 +183,14 @@ function drawGrid(grid) {
 
             if (grid[x][y].char == charMap.get('player')) {
 
-                drawLitArea(grid, { x: x, y: y }, 1);
+                drawLitArea(grid, { x: x, y: y }, 1, 0, 1);
+                drawLitArea(grid, { x: x, y: y }, -1, 0, 1);
+                drawLitArea(grid, { x: x, y: y }, 0, 1, 1);
+                drawLitArea(grid, { x: x, y: y }, 0, -1, 1);
+                drawLitArea(grid, { x: x, y: y }, 1, 1, 1);
+                drawLitArea(grid, { x: x, y: y }, 1, -1, 1);
+                drawLitArea(grid, { x: x, y: y }, -1, 1, 1);
+                drawLitArea(grid, { x: x, y: y }, -1, -1, 1);
             }
 
             if (grid[x][y].visited) ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);

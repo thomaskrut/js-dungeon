@@ -35,17 +35,14 @@ function playerCommand(command) {
             player.y += modY;
             updateView(player, grid);
         }
-        
-    }
-   
-   
 
+    }
 }
 
 function generateMap(grid) {
 
-    createRoom(grid, {x: GRID_SIZE / 2, y: GRID_SIZE / 2})
-    
+    createRoom(grid, { x: GRID_SIZE / 2, y: GRID_SIZE / 2 })
+
     const numberOfIterations = getRandom(2) + 5;
 
     for (let i = 0; i < numberOfIterations; i++) {
@@ -55,24 +52,24 @@ function generateMap(grid) {
         createPassage(grid, getEmptyPoint(grid));
     }
 
-    
+
 
 }
 
 function getRandomDirection() {
     switch (getRandom(4)) {
-        case 0: return {dirX: 1, dirY: 0}
-        case 1: return {dirX: -1, dirY: 0}
-        case 2: return {dirX: 0, dirY: 1}
-        case 3: return {dirX: 0, dirY: -1}   
+        case 0: return { dirX: 1, dirY: 0 }
+        case 1: return { dirX: -1, dirY: 0 }
+        case 2: return { dirX: 0, dirY: 1 }
+        case 3: return { dirX: 0, dirY: -1 }
     }
 }
 
 function getEmptyPoint(grid) {
-    while(true) {
-        const randX = getRandom(GRID_SIZE);
-        const randY = getRandom(GRID_SIZE);
-        if (grid[randX][randY].char == ' ') return {x: randX, y: randY}
+    while (true) {
+        const randX = 1 + getRandom(GRID_SIZE - 2);
+        const randY = 1 + getRandom(GRID_SIZE - 2);
+        if (grid[randX][randY].char == ' ') return { x: randX, y: randY }
     }
 }
 
@@ -81,8 +78,8 @@ function createPassage(grid, startingPoint) {
     let y = startingPoint.y;
     let direction = getRandomDirection();
 
-    while(x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
-        while(getRandom(5) != 0) {
+    while (x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
+        while (getRandom(5) != 0) {
             grid[x][y] = {
                 char: ' ',
                 visited: false
@@ -93,8 +90,8 @@ function createPassage(grid, startingPoint) {
         }
         direction = getRandomDirection();
     }
-    
-    
+
+
 }
 
 function createRoom(grid, startingPoint) {
@@ -105,7 +102,7 @@ function createRoom(grid, startingPoint) {
     const height = getRandom(15) + 5;
 
     if (startX + width > GRID_SIZE - 1 || startY + height > GRID_SIZE - 1) {
-        createRoom(grid);
+        createRoom(grid, getEmptyPoint(grid));
         return;
     }
 
@@ -159,7 +156,7 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
 function updateView(player, grid) {
     drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
-  
+
 }
 
 function drawGrid(grid) {
@@ -218,7 +215,7 @@ function initKeyListener() {
                 return; // 
         }
         console.log(event.key);
-       
+
         event.preventDefault();
     }, true);
 }

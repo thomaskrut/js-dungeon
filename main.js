@@ -1,5 +1,5 @@
-const VIEWPORT_HEIGHT = 400;
-const VIEWPORT_WIDTH = 600;
+const VIEWPORT_HEIGHT = 600;
+const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
@@ -20,13 +20,36 @@ initKeyListener();
 
 updateView(player, grid);
 
+function playerCommand(command) {
+
+    if (command.length <= 2) {
+        let modX = 0;
+        let modY = 0;
+        if (command.includes('N')) modY = -1;
+        if (command.includes('S')) modY = 1;
+        if (command.includes('E')) modX = 1;
+        if (command.includes('W')) modX = -1;
+
+        if (grid[player.x + modX][player.y + modY].char == ' ') {
+            player.x += modX;
+            player.y += modY;
+            updateView(player, grid);
+        }
+        
+    }
+   
+   
+
+}
+
 function generateMap(grid) {
 
     createRoom(grid, {x: GRID_SIZE / 2, y: GRID_SIZE / 2})
     
-    const numberOfIterations = getRandom(5) + 5;
+    const numberOfIterations = getRandom(2) + 5;
 
     for (let i = 0; i < numberOfIterations; i++) {
+        createRoom(grid, getEmptyPoint(grid));
         createRoom(grid, getEmptyPoint(grid));
         createRoom(grid, getEmptyPoint(grid));
         createPassage(grid, getEmptyPoint(grid));
@@ -136,12 +159,12 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
 function updateView(player, grid) {
     drawGrid(getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
-    //drawAgents(player);
+  
 }
 
 function drawGrid(grid) {
     ctx.fillStyle = "black";
-    ctx.font = "22px courier";
+    ctx.font = "22px monospace";
     ctx.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     ctx.fillStyle = "white";
 
@@ -164,45 +187,38 @@ function initKeyListener() {
         switch (event.key) {
             case "ArrowDown":
             case "2":
-                player.y++;
+                playerCommand('S');
                 break;
             case "ArrowUp":
             case "8":
-                player.y--;
+                playerCommand('N');
                 break;
             case "ArrowLeft":
             case "4":
-                player.x--;
+                playerCommand('W');
                 break;
             case "ArrowRight":
             case "6":
-                player.x++;
+                playerCommand('E');
                 break;
             case "7":
-                player.x--;
-                player.y--;
+                playerCommand('NW');
                 break;
             case "9":
-                player.x++;
-                player.y--;
+                playerCommand('NE');
                 break;
             case "1":
-                player.x--;
-                player.y++;
+                playerCommand('SW');
                 break;
             case "3":
-                player.x++;
-                player.y++;
+                playerCommand('SE');
                 break;
             default:
                 console.log(event.key);
-                return; // Quit when this doesn't handle the key event.
+                return; // 
         }
         console.log(event.key);
-
-        updateView(player, grid);
-
-        // Cancel the default action to avoid it being handled twice
+       
         event.preventDefault();
     }, true);
 }

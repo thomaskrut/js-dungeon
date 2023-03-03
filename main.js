@@ -10,36 +10,64 @@ const charMap = new Map();
 
 charMap.set('wall', '\u25A7').set('player', '@');
 
-const player = {
-    x: 1,
-    y: 1
-};
-
-var grid = initGrid();
+const grid = initGrid();
 
 generateMap(grid);
 
+const player = getEmptyPoint(grid);
+
 initKeyListener();
 
-updateView(player, getGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
+updateView(player, grid);
 
 function generateMap(grid) {
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
-    createRoom(grid);
+
+    createRoom(grid, {x: GRID_SIZE / 2, y: GRID_SIZE / 2})
+
 }
 
-function createRoom(grid) {
+function getRandomDirection() {
+    switch (getRandom(4)) {
+        case 0: return {dirX: 1, dirY: 0}
+        case 1: return {dirX: -1, dirY: 0}
+        case 2: return {dirX: 0, dirY: 1}
+        case 3: return {dirX: 0, dirY: -1}   
+    }
+}
 
-    const startX = 2 + getRandom(GRID_SIZE)
-    const startY = 2 + getRandom(GRID_SIZE);
+function getEmptyPoint(grid) {
+    while(true) {
+        const randX = getRandom(GRID_SIZE);
+        const randY = getRandom(GRID_SIZE);
+        if (grid[randX][randY].char == ' ') return {x: randX, y: randY}
+    }
+}
+
+function createPassage(grid) {
+    let x = 2 + getRandom(GRID_SIZE)
+    let y = 2 + getRandom(GRID_SIZE);
+    let direction = getRandomDirection();
+
+    while(x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2) {
+        while(getRandom(15) != 0) {
+            grid[x][y] = {
+                char: ' ',
+                visited: false
+            }
+            x = x + direction.dirX;
+            y = y + direction.dirY;
+            if (x < 2 || x > GRID_SIZE - 2 || y < 2 || y > GRID_SIZE - 2) break;
+        }
+        direction = getRandomDirection();
+    }
+    
+    
+}
+
+function createRoom(grid, startingPoint) {
+
+    const startX = startingPoint.x;
+    const startY = startingPoint.y;
     const width = getRandom(15) + 5;
     const height = getRandom(15) + 5;
 
@@ -76,7 +104,7 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
-   
+
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
     if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
 
@@ -84,14 +112,14 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
     for (var x = 0; x < elementsWide; x++) {
         gridSection[x] = [];
         for (var y = 0; y < elementsHigh; y++)
-        if (centerObject.x == startX + x && centerObject.y == startY + y) {
-            gridSection[x][y] = {
-                char: charMap.get('player'),
+            if (checkOverlap(centerObject, { x: x + startX, y: y + startY })) {
+                gridSection[x][y] = {
+                    char: charMap.get('player'),
+                }
+            } else {
+                gridSection[x][y] = grid[startX + x][startY + y];
             }
-        } else {
-            gridSection[x][y] = grid[startX + x][startY + y];
-        }
-            
+
     }
     return gridSection;
 }
@@ -114,11 +142,10 @@ function drawGrid(grid) {
     }
 }
 
-function drawAgents(player) {
-    let playerX = (player.x > VIEWPORT_WIDTH / ELEMENT_SIZE / 2) ? VIEWPORT_WIDTH / ELEMENT_SIZE / 2 : player.x;
-    let playerY = (player.y > VIEWPORT_HEIGHT / ELEMENT_SIZE / 2) ? VIEWPORT_HEIGHT / ELEMENT_SIZE / 2 : player.y;
-    ctx.fillText(charMap.get('player'), playerX * ELEMENT_SIZE, playerY * ELEMENT_SIZE);
+function checkOverlap(object1, object2) {
+    return (object1.x == object2.x && object1.y == object2.y);
 }
+
 
 function initKeyListener() {
 

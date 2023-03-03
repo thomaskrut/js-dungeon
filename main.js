@@ -54,6 +54,9 @@ function drawMessages() {
         messagesContext.fillText(recentMessages[i], 10, (i + 1) * 20);
     }
 
+    messagesContext.fillStyle = messagesColour[0];
+    messagesContext.fillText("X: " + player.x + " | Y: " + player.y, VIEWPORT_WIDTH - 160, 20)
+
 }
 
 function generateItem(item) {

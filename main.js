@@ -3,14 +3,16 @@ const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-let litAreaSize = 5;
+let litAreaSize = 10;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
 
 const charMap = new Map();
 
-charMap.set('wall', '\u25A7').set('player', '@');
+
+
+charMap.set('wall', '\u25A7').set('player', '@').set('coin', '$')
 
 const grid = initGrid();
 
@@ -18,9 +20,44 @@ generateMap(grid);
 
 const player = getEmptyPoint(grid);
 
+const items = generateItemsArray();
+
 initKeyListener();
 
 updateView(player, grid);
+
+function generateItem(item) {
+
+    let point = getEmptyPoint(grid);
+
+    switch (item) {
+
+        case 'coin': return {
+            x: point.x,
+            y: point.y,
+            char: charMap.get('coin')
+        }
+    }
+}
+
+function generateItemsArray() {
+
+    let items = [];
+
+    const numberOfItems = 20 + getRandom(20);
+
+    for (let i = 0; i < numberOfItems; i++) {
+
+        let r = getRandom(50);
+
+        if (r > 20) items.push(generateItem('coin'));
+
+
+    }
+
+    return items;
+
+}
 
 function playerCommand(command) {
 
@@ -32,7 +69,7 @@ function playerCommand(command) {
         if (command.includes('E')) modX = 1;
         if (command.includes('W')) modX = -1;
 
-        if (grid[player.x + modX][player.y + modY].char == ' ') {
+        if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
             player.x += modX;
             player.y += modY;
             updateView(player, grid);
@@ -139,7 +176,7 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
-    
+
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
     if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
     const playerX = centerObject.x - startX;
@@ -150,10 +187,14 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
         for (var y = 0; y < elementsHigh; y++) {
             gridSection[x][y] = grid[startX + x][startY + y];
             gridSection[x][y].lit = false;
+            items.forEach(i => {
+                if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
+            });
+
         }
     }
 
-    
+
 
     gridSection[playerX][playerY] = {
         char: charMap.get('player'),
@@ -186,21 +227,21 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
     gridSection[x][y].visited = true;
 
     if (gridSection[x][y].char != charMap.get('wall')) {
-    createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, 1, 1, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, 1, -1, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, -1, 1, step + 1);
-    createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, 1, 1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, 1, -1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, -1, 1, step + 1);
+        createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
     }
 
 }
 
 function drawGrid(grid) {
     ctx.fillStyle = "black";
-    ctx.font = "22px monospace";
+    ctx.font = "22px system-ui";
     ctx.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     ctx.fillStyle = "white";
 
@@ -210,6 +251,7 @@ function drawGrid(grid) {
             if (grid[x][y].lit) {
                 ctx.fillStyle = 'silver';
                 ctx.fillText(grid[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+
             }
             else if (grid[x][y].visited) {
                 ctx.fillStyle = 'gray';

@@ -139,11 +139,11 @@ function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
-    const playerX = centerObject.x - startX;
-    const playerY = centerObject.y - startY;
+    
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
     if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
-
+    const playerX = centerObject.x - startX;
+    const playerY = centerObject.y - startY;
     let gridSection = [];
     for (var x = 0; x < elementsWide; x++) {
         gridSection[x] = [];
@@ -186,7 +186,7 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
     gridSection[x][y].visited = true;
 
     if (gridSection[x][y].char != charMap.get('wall')) {
-        createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
     createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1);
     createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1);
     createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1);

@@ -3,7 +3,7 @@ const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-let litAreaSize = 8;
+let litAreaSize = 5;
 
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
@@ -137,8 +137,8 @@ function initGrid() {
 
 function getGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
-    const startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
-    const startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
+    let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
+    let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
     const playerX = centerObject.x - startX;
     const playerY = centerObject.y - startY;
     if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
@@ -177,15 +177,23 @@ function updateView(player, grid) {
 
 }
 
-function createLitArea(grid, startingPoint, modX, modY, step) {
+function createLitArea(gridSection, startingPoint, modX, modY, step) {
     let x = startingPoint.x + modX;
     let y = startingPoint.y + modY;
+    if (gridSection[x][y].lit) return;
     if (step == litAreaSize) return;
-    grid[x][y].lit = true;
-    grid[x][y].visited = true;
+    gridSection[x][y].lit = true;
+    gridSection[x][y].visited = true;
 
-    if (grid[x][y].char != charMap.get('wall')) {
-        createLitArea(grid, { x: x, y: y }, modX, modY, step + 1);
+    if (gridSection[x][y].char != charMap.get('wall')) {
+        createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, 1, 1, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, 1, -1, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, -1, 1, step + 1);
+    createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
     }
 
 }

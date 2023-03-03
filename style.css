@@ -1,0 +1,12 @@
+body {
+    padding-top: 40px;
+    margin: auto;
+    width: 80%;
+    background-color: darkgray;
+}
+
+canvas {
+    padding: 2px;
+    display: block;
+    
+}

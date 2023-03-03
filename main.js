@@ -46,7 +46,7 @@ function drawMessages() {
         recentMessages.unshift(messagesQueue.pop())
     }
     messagesContext.fillStyle = "black";
-    messagesContext.font = "16px courier";
+    messagesContext.font = "16px courier new";
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
     
     for (let i = 0; i < recentMessages.length; i++) {
@@ -94,7 +94,7 @@ function generateItemsArray() {
 
         let r = getRandom(50);
 
-        if (r > 20) items.push(generateItem('coin'));
+        if (r > 40) items.push(generateItem('coin'));
 
 
     }
@@ -295,7 +295,7 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
 
 function drawGridSection(gridSection) {
     mapViewContext.fillStyle = "black";
-    mapViewContext.font = "22px courier";
+    mapViewContext.font = "18pt courier new";
     mapViewContext.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     mapViewContext.fillStyle = "white";
 
@@ -308,7 +308,7 @@ function drawGridSection(gridSection) {
 
             }
             else if (gridSection[x][y].visited) {
-                mapViewContext.fillStyle = 'gray';
+                mapViewContext.fillStyle = 'dimgray';
                 mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
             }
         }

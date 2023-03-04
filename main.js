@@ -4,19 +4,12 @@ const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-let litAreaSize = 6;
+let litAreaSize = 5;
 
-const mapView = document.getElementById('mapView');
-const messages = document.getElementById('messages');
-
-const mapViewContext = mapView.getContext("2d");
-const messagesContext = messages.getContext("2d");
+const mapViewContext = document.getElementById('mapView').getContext("2d");
+const messagesContext = document.getElementById('messages').getContext("2d");
 
 const charMap = new Map();
-
-const messagesQueue = [];
-const recentMessages = [];
-const messagesColour = ["white", "silver", "gray", "dimgray"];
 
 charMap.set('wall', '\u25A7').set('player', '@').set('coin', '$')
 
@@ -24,39 +17,88 @@ const grid = initGrid();
 
 generateMap(grid);
 
-const player = getEmptyPoint(grid);
+const items = [
+    {
+        name: "Gold",
+        char: "$",
+        prob: 80,
+        value: 0,
+        maxValue: 500,
+        minValue: 5,
+        pickupAction: "addGold",
+        pickupParameter: "value",
+    },
+    {
+        name: "Apple",
+        char: "0",
+        prob: 50
+    }
+];
 
-const items = generateItemsArray();
+const player = {
+    x: 0,
+    y: 0,
+    gold: 0,
+
+    setPosition: function(pos) {
+        this.x = pos.x;
+        this.y = pos.y;
+    },
+
+    addGold: function(amount) {
+        this.gold += amount;
+        console.log(amount);
+    }
+
+}
+
+const mapItems = generateItemsArray();
+
+const messages = {
+
+    newMessages: [],
+    messageColour: ["white", "silver", "gray", "dimgray"],
+    recentMessages: [],
+
+    addMessage: function (message) {
+        this.newMessages.unshift(message);
+        this.updateRecent();
+    },
+
+    updateRecent: function () {
+        if (this.newMessages.length > 0) {
+            if (messages.recentMessages.length > 3) messages.recentMessages.pop();
+            this.recentMessages.unshift(this.newMessages.pop())
+        }
+    }
+
+
+};
 
 initKeyListener();
 
+player.setPosition(getEmptyPoint(grid));
+
 updateMapView(player, grid);
 
-generateMessage("Welcome!");
+messages.addMessage("Welcome!");
+messages.updateRecent();
+drawMessages(messages);
 
-drawMessages();
+function drawMessages(messages) {
 
-function generateMessage(message) {
-    messagesQueue.unshift(message);
-}
-
-function drawMessages() {
-    if (messagesQueue.length > 0) {
-        if (recentMessages.length > 3) recentMessages.pop();
-        recentMessages.unshift(messagesQueue.pop())
-    }
     messagesContext.fillStyle = "black";
     messagesContext.font = "16px courier new";
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
-    
-    for (let i = 0; i < recentMessages.length; i++) {
-        messagesContext.fillStyle = messagesColour[i];
-        messagesContext.fillText(recentMessages[i], 10, (i + 1) * 20);
-    }
 
-    messagesContext.fillStyle = messagesColour[0];
+    messages.recentMessages.forEach((m, i) => {
+        messagesContext.fillStyle = messages.messageColour[i];
+        messagesContext.fillText(m, 10, (i + 1) * 20);
+    });
+
+    messagesContext.fillStyle = messages.messageColour[0];
     messagesContext.fillText("X: " + player.x + " | Y: " + player.y, VIEWPORT_WIDTH - 160, 20)
-
+    messagesContext.fillText("Gold: " + player.gold, VIEWPORT_WIDTH - 160, 40)
 }
 
 function generateItem(item) {
@@ -71,7 +113,7 @@ function generateItem(item) {
             value: getRandom(500) + 5,
             char: charMap.get('coin'),
             pickUp: function () {
-                generateMessage("You found " + this.value + " gold!")
+                messages.addMessage("You found " + this.value + " gold!")
                 removeItem(this);
             }
         }
@@ -80,26 +122,35 @@ function generateItem(item) {
 
 function removeItem(item) {
     grid[item.x][item.y].char = ' ';
-    items.splice(items.indexOf(item), 1);
+    mapItems.splice(mapItems.indexOf(item), 1);
 
 }
 
 function generateItemsArray() {
 
-    let items = [];
+    let newItems = [];
 
-    const numberOfItems = 20 + getRandom(20);
+    const numberOfItems = 10 + getRandom(20);
 
     for (let i = 0; i < numberOfItems; i++) {
 
-        let r = getRandom(50);
+        let r = getRandom(100);
 
-        if (r > 40) items.push(generateItem('coin'));
+        items.forEach(i => {
+            if (i.prob >= r) {
+                let o = Object.assign({},i);
+                o.value = o.minValue + getRandom(o.maxValue - o.minValue);
+                let pos = getEmptyPoint(grid);
+                o.x = pos.x;
+                o.y = pos.y;
+                newItems.push(o);
+            }
+        })
 
 
     }
 
-    return items;
+    return newItems;
 
 }
 
@@ -119,14 +170,16 @@ function playerCommand(command) {
             updateMapView(player, grid);
         }
 
-        items.forEach(i => {
+        mapItems.forEach(i => {
             if (checkOverlap(i, player)) {
-                i.pickUp();
+                player[i.pickupAction]?.call(player, i.value);
+                messages.addMessage("You found " + i.name + " " + i?.value)
+                removeItem(i);
             }
         })
 
     }
-    drawMessages();
+    drawMessages(messages);
 }
 
 function generateMap(grid) {
@@ -138,7 +191,7 @@ function generateMap(grid) {
     for (let i = 0; i < numberOfIterations; i++) {
         createRoom(grid, getEmptyPoint(grid));
         createRoom(grid, getEmptyPoint(grid));
-        
+
         createPassage(grid, getEmptyPoint(grid));
     }
 
@@ -241,7 +294,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
         for (var y = 0; y < elementsHigh; y++) {
             gridSection[x][y] = grid[startX + x][startY + y];
             gridSection[x][y].lit = false;
-            items.forEach(i => {
+            mapItems.forEach(i => {
                 if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
             });
 

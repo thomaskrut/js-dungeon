@@ -17,42 +17,56 @@ const grid = initGrid();
 
 generateMap(grid);
 
-const items = [
+const itemTemplates = [
     {
         name: "Gold",
+        prefix: "pieces of",
         char: "$",
-        prob: 80,
-        value: 0,
-        maxValue: 500,
-        minValue: 5,
-        pickupAction: "addGold",
-        pickupParameter: "value",
+        prob: 100,
+        value: 0, maxValue: 500, minValue: 5,
+        pickupAction: "addGold"
     },
     {
         name: "Apple",
-        char: "0",
-        prob: 50
+        prefix: "an",
+        char: "õ",
+        prob: 50,
+        value: 10, minValue: 10, maxValue: 10,
+        pickupAction: "addToInventory",
+        useAction: "eatFood"
     }
 ];
+
 
 const player = {
     x: 0,
     y: 0,
     gold: 0,
+    hunger: 0,
 
-    setPosition: function(pos) {
+    inventory: [],
+
+    setPosition: function (pos) {
         this.x = pos.x;
         this.y = pos.y;
     },
 
-    addGold: function(amount) {
-        this.gold += amount;
-        console.log(amount);
+    earFood: function (item) {
+        this.hunger =- item.value;
+    },
+
+    addGold: function (item) {
+        this.gold += item.value;
+        messages.addMessage("You found " + item.value + " gold!");
+    },
+
+    addToInventory: function (item) {
+        this.inventory.push(item);
+        console.log(this.inventory);
+        messages.addMessage("You found " + item.prefix + " " + item.name.toLowerCase());
     }
 
 }
-
-const mapItems = generateItemsArray();
 
 const messages = {
 
@@ -75,9 +89,11 @@ const messages = {
 
 };
 
-initKeyListener();
-
 player.setPosition(getEmptyPoint(grid));
+
+const mapItems = generateItemsArray();
+
+initKeyListener();
 
 updateMapView(player, grid);
 
@@ -101,23 +117,20 @@ function drawMessages(messages) {
     messagesContext.fillText("Gold: " + player.gold, VIEWPORT_WIDTH - 160, 40)
 }
 
-function generateItem(item) {
+function generateItem(template) {
+
+    let newItem = Object.assign({}, template);
 
     let point = getEmptyPoint(grid);
-
-    switch (item) {
-
-        case 'coin': return {
-            x: point.x,
-            y: point.y,
-            value: getRandom(500) + 5,
-            char: charMap.get('coin'),
-            pickUp: function () {
-                messages.addMessage("You found " + this.value + " gold!")
-                removeItem(this);
-            }
-        }
+    newItem.x = point.x;
+    newItem.y = point.y;
+    newItem.value = template.minValue + getRandom(template.maxValue - template.minValue);
+    newItem.pickUp = function () {
+        player[template.pickupAction]?.call(player, newItem);
+        removeItem(newItem);
     }
+    return newItem;
+
 }
 
 function removeItem(item) {
@@ -134,16 +147,11 @@ function generateItemsArray() {
 
     for (let i = 0; i < numberOfItems; i++) {
 
-        let r = getRandom(100);
+        let r = getRandom(1000);
 
-        items.forEach(i => {
+        itemTemplates.forEach(i => {
             if (i.prob >= r) {
-                let o = Object.assign({},i);
-                o.value = o.minValue + getRandom(o.maxValue - o.minValue);
-                let pos = getEmptyPoint(grid);
-                o.x = pos.x;
-                o.y = pos.y;
-                newItems.push(o);
+                newItems.push(generateItem(i));
             }
         })
 
@@ -172,9 +180,7 @@ function playerCommand(command) {
 
         mapItems.forEach(i => {
             if (checkOverlap(i, player)) {
-                player[i.pickupAction]?.call(player, i.value);
-                messages.addMessage("You found " + i.name + " " + i?.value)
-                removeItem(i);
+                i.pickUp();
             }
         })
 
@@ -255,7 +261,7 @@ function createRoom(grid, startingPoint) {
             grid[x][y] = {
                 char: ' ',
                 visited: false,
-                lit: false
+                lit: false,
             }
         }
     }

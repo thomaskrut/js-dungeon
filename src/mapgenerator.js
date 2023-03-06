@@ -68,7 +68,7 @@ function createRoom(grid, charMap, startingPoint) {
     const height = getRandom(10) + 5;
 
     if (startX + width > g.GRID_SIZE - 1 || startY + height > g.GRID_SIZE - 1) {
-        createRoom(grid, charMap, getEmptyPoint(grid));
+        createRoom(grid, charMap, getEmptyPoint(grid, charMap));
         return;
     }
 

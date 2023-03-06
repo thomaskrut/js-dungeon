@@ -1,9 +1,16 @@
 export {drawGridSection, drawMessages, drawInventory, drawEntireMap};
 
 import { globals as g } from "./globals.js";
+import { messages } from "./messages.js";
+import { player } from "./player.js";
 
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
+
+const interval = setInterval(() => {
+    messages.addMessage(" ");
+    drawMessages(player, messages);
+}, 1500)
 
 function drawInventory(items, player) {
     
@@ -35,13 +42,14 @@ function drawMessages(player, messages) {
     messagesContext.fillRect(0, 0, g.VIEWPORT_WIDTH, g.MESSAGES_HEIGHT);
 
     messages.recentMessages.forEach((m, i) => {
-        messagesContext.fillStyle = "silver";
+        messagesContext.fillStyle = messages.messageColour[i];
         messagesContext.fillText(m, 10, (i + 1) * 14);
     });
 
-    messagesContext.fillStyle = messages.messageColour[0];
+    messagesContext.fillStyle = "silver";
     messagesContext.fillText("X: " + player.x + " | Y: " + player.y, g.VIEWPORT_WIDTH - 160, 20)
     messagesContext.fillText("HP: " + player.hp, g.VIEWPORT_WIDTH - 160, 40)
+   
 }
 
 function drawGridSection(gridSection, charMap) {

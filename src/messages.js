@@ -3,7 +3,7 @@ export { messages };
 const messages = {
 
     newMessages: [],
-    messageColour: ["white", "silver", "gray", "dimgray", "dimgray", "dimgray"],
+    messageColour: ["#FFF", "#CCC", "#888", "#444", "#222", "#111", "#000"],
     recentMessages: [],
 
     addMessage: function (message) {

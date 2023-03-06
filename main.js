@@ -200,13 +200,19 @@ function generateMap(grid) {
     }
 }
 
-function getRandomDirection() {
-    switch (getRandom(4)) {
-        case 0: return { modX: 1, modY: 0 }
-        case 1: return { modX: -1, modY: 0 }
-        case 2: return { modX: 0, modY: 1 }
-        case 3: return { modX: 0, modY: -1 }
+function getRandomDirection(modX, modY) {
+    if (modX == 0) {
+        switch (getRandom(2)) {
+            case 0: return {modX: 1, modY: 0}
+            case 1: return {modX: -1, modY: 0}
+        }
+    } else if (modY == 0) {
+        switch (getRandom(2)) {
+            case 0: return {modX: 0, modY: 1}
+            case 1: return {modX: 0, modY: -1}
     }
+    console.log("error");
+}
 }
 
 function getEmptyPoint(grid) {
@@ -220,8 +226,8 @@ function getEmptyPoint(grid) {
 function createPassage(grid, startingPoint) {
     let x = startingPoint.x;
     let y = startingPoint.y;
-    let direction = getRandomDirection();
-
+    let direction = getRandomDirection(1, 0);
+    console.log(direction);
     while (x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
         while (getRandom(5) != 0) {
             grid[x][y] = {
@@ -233,7 +239,7 @@ function createPassage(grid, startingPoint) {
             y = y + direction.modY;
             if (x < 2 || x > GRID_SIZE - 2 || y < 2 || y > GRID_SIZE - 2) break;
         }
-        direction = getRandomDirection();
+        direction = getRandomDirection(direction.modX, direction.modY);
     }
     return {x: x, y: y};
 
@@ -427,14 +433,14 @@ function getRandom(max) {
 function drawEntireMap(grid) {
 
     updateMapView();
-    const startX = 50;
+    const startX = VIEWPORT_WIDTH / 2 - GRID_SIZE;
     const startY = 30;
-    mapViewContext.fillStyle = "dimgray";
+    mapViewContext.fillStyle = "black";
     mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
     mapViewContext.strokeStyle = "silver";
     mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
 
-    mapViewContext.fillStyle = "black";
+    mapViewContext.fillStyle = "gray";
     for(let x = 0; x < GRID_SIZE; x++) {
         for (let y = 0; y < GRID_SIZE; y++) {
 

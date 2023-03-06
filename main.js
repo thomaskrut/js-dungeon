@@ -41,7 +41,10 @@ const monsterTemplates = [
     {
         name: "Rat",
         char: "r",
-        prob: 900
+        prob: 200,
+        attack: "bites",
+        moves: true,
+        aggressive: false
     }
 
 ];
@@ -61,7 +64,7 @@ const player = {
     },
 
     earFood: function (item) {
-        this.hunger =- item.value;
+        this.hunger = - item.value;
     },
 
     addGold: function (item) {
@@ -204,6 +207,48 @@ function generateItemsArray() {
 
 }
 
+function moveMonsters(monsters, player, grid) {
+
+    monsters.forEach(m => {
+
+        if (m.moves) {
+            grid[m.x][m.y].char = charMap.get('floor');
+            let modX = 0;
+            let modY = 0;
+            if (player.x > m.x) modX = 1;
+            if (player.x < m.x) modX = -1;
+            if (player.y > m.y) modY = 1;
+            if (player.y < m.y) modY = -1;
+            let counter = 0;
+            while (grid[m.x + modX][m.y + modY].char != charMap.get('floor')) {
+                modX = getRandom(2) - 1;
+                modY = getRandom(2) - 1;
+                counter++;
+                if (counter == 10) {
+                    modX = 0;
+                    modY = 0;
+                    break;
+                }
+            }
+            
+            if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
+                messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
+                modX = 0;
+                modY = 0;
+            }
+            
+            m.x = m.x + modX;
+            m.y = m.y + modY;
+            grid[m.x][m.y].char = m.char;
+
+        }
+
+    });
+
+}
+
+
+
 function playerCommand(command) {
 
     if (command.length <= 2) {
@@ -217,6 +262,7 @@ function playerCommand(command) {
         if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
             player.x += modX;
             player.y += modY;
+            moveMonsters(monsters, player, grid);
             updateMapView(player, grid);
         }
 
@@ -227,6 +273,12 @@ function playerCommand(command) {
         })
 
     }
+
+    if (command == 'rest') {
+        moveMonsters(monsters, player, grid);
+        updateMapView(player, grid);
+    }
+
     drawMessages(messages);
 }
 
@@ -245,16 +297,16 @@ function generateMap(grid) {
 function getRandomDirection(modX, modY) {
     if (modX == 0) {
         switch (getRandom(2)) {
-            case 0: return {modX: 1, modY: 0}
-            case 1: return {modX: -1, modY: 0}
+            case 0: return { modX: 1, modY: 0 }
+            case 1: return { modX: -1, modY: 0 }
         }
     } else if (modY == 0) {
         switch (getRandom(2)) {
-            case 0: return {modX: 0, modY: 1}
-            case 1: return {modX: 0, modY: -1}
+            case 0: return { modX: 0, modY: 1 }
+            case 1: return { modX: 0, modY: -1 }
+        }
+        console.log("error");
     }
-    console.log("error");
-}
 }
 
 function getEmptyPoint(grid) {
@@ -283,7 +335,7 @@ function createPassage(grid, startingPoint) {
         }
         direction = getRandomDirection(direction.modX, direction.modY);
     }
-    return {x: x, y: y};
+    return { x: x, y: y };
 
 }
 
@@ -427,6 +479,9 @@ function initKeyListener() {
     window.addEventListener("keydown", event => {
 
         switch (event.key) {
+            case "5":
+                playerCommand('rest');
+                break;
             case "ArrowDown":
             case "2":
                 playerCommand('S');
@@ -484,7 +539,7 @@ function drawEntireMap(grid) {
     mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
 
     mapViewContext.fillStyle = "gray";
-    for(let x = 0; x < GRID_SIZE; x++) {
+    for (let x = 0; x < GRID_SIZE; x++) {
         for (let y = 0; y < GRID_SIZE; y++) {
 
             if (grid[x][y].char == charMap.get('floor')) {

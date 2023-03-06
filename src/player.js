@@ -1,5 +1,4 @@
 export { player };
-import { messages } from "./messages.js";
 
 const player = {
     x: 0,
@@ -17,16 +16,16 @@ const player = {
         this.y = pos.y;
     },
 
-    earFood: function (item) {
-        this.hunger = - item.value;
+    earFood: function (item, messages) {
+        this.hunger -= item.value;
     },
 
-    addGold: function (item) {
+    addGold: function (item, messages) {
         this.gold += item.value;
         messages.addMessage("You found " + item.value + " gold!");
     },
 
-    addToInventory: function (item) {
+    addToInventory: function (item, messages) {
         this.inventory.push(item);
         console.log(this.inventory);
         messages.addMessage("You found " + item.prefix + " " + item.name.toLowerCase());

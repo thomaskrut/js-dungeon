@@ -3,30 +3,19 @@ import { monsterTemplates, itemTemplates } from "./src/templates.js";
 import { drawEntireMap, drawGridSection, drawInventory, drawMessages } from "./src/drawing.js";
 import { messages } from "./src/messages.js";
 import { charMap } from "./src/charmap.js";
-
-const VIEWPORT_WIDTH = 800;
-const VIEWPORT_HEIGHT = 480;
-const MESSAGES_HEIGHT = 100;
-const ELEMENT_SIZE = 20;
-const GRID_SIZE = 200;
+import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
+import { globals as g } from "./src/globals.js";
+import { getRandom } from "./src/util.js";
 
 let gameState = 'MAZE';
 
 let litAreaSize = 5;
 
+const grid = initGrid(charMap);
 
+generateMap(grid, charMap);
 
-
-
-const grid = initGrid();
-
-generateMap(grid);
-
-
-
-
-
-player.setPosition(getEmptyPoint(grid));
+player.setPosition(getEmptyPoint(grid, charMap));
 
 const items = generateItemsArray();
 
@@ -45,12 +34,12 @@ function generateItem(template) {
 
     let newItem = Object.assign({}, template);
 
-    let point = getEmptyPoint(grid);
+    let point = getEmptyPoint(grid, charMap);
     newItem.x = point.x;
     newItem.y = point.y;
     newItem.value = template.minValue + getRandom(template.maxValue - template.minValue);
     newItem.pickUp = function () {
-        player[template.pickupAction]?.call(player, newItem);
+        player[template.pickupAction]?.call(player, newItem, messages);
         removeItem(newItem);
     }
     return newItem;
@@ -59,7 +48,7 @@ function generateItem(template) {
 
 function generateMonster(template) {
     let newMonster = Object.assign({}, template);
-    let point = getEmptyPoint(grid);
+    let point = getEmptyPoint(grid, charMap);
     newMonster.x = point.x;
     newMonster.y = point.y;
     newMonster.hp = template.hp + getRandom(5);
@@ -211,11 +200,6 @@ function playerCommand(command) {
                 updateMapView(player, grid);
             }
 
-            if (command == 'inventory') {
-                drawInventory(items);
-                gameState = 'INVENTORY';
-            }
-
             drawMessages(player, messages);
             break;
         }
@@ -231,108 +215,13 @@ function playerCommand(command) {
 
 }
 
-function generateMap(grid) {
-
-    createRoom(grid, { x: GRID_SIZE / 2, y: GRID_SIZE / 2 })
-
-    const numberOfIterations = 4;
-
-    for (let i = 0; i < numberOfIterations; i++) {
-        createRoom(grid, getEmptyPoint(grid));
-        createRoom(grid, createPassage(grid, getEmptyPoint(grid)));
-    }
-}
-
-function getRandomDirection(modX, modY) {
-    if (modX == 0) {
-        switch (getRandom(2)) {
-            case 0: return { modX: 1, modY: 0 }
-            case 1: return { modX: -1, modY: 0 }
-        }
-    } else if (modY == 0) {
-        switch (getRandom(2)) {
-            case 0: return { modX: 0, modY: 1 }
-            case 1: return { modX: 0, modY: -1 }
-        }
-        console.log("error");
-    }
-}
-
-function getEmptyPoint(grid) {
-    while (true) {
-        const randX = 1 + getRandom(GRID_SIZE - 2);
-        const randY = 1 + getRandom(GRID_SIZE - 2);
-        if (grid[randX][randY].char == charMap.get('floor')) return { x: randX, y: randY }
-    }
-}
-
-function createPassage(grid, startingPoint) {
-    let x = startingPoint.x;
-    let y = startingPoint.y;
-    let direction = getRandomDirection(1, 0);
-    console.log(direction);
-    while (x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
-        while (getRandom(5) != 0) {
-            grid[x][y] = {
-                char: charMap.get('floor'),
-                visited: false,
-                lit: false
-            }
-            x = x + direction.modX;
-            y = y + direction.modY;
-            if (x < 2 || x > GRID_SIZE - 2 || y < 2 || y > GRID_SIZE - 2) break;
-        }
-        direction = getRandomDirection(direction.modX, direction.modY);
-    }
-    return { x: x, y: y };
-
-}
-
-function createRoom(grid, startingPoint) {
-
-    const startX = startingPoint.x;
-    const startY = startingPoint.y;
-    const width = getRandom(10) + 5;
-    const height = getRandom(10) + 5;
-
-    if (startX + width > GRID_SIZE - 1 || startY + height > GRID_SIZE - 1) {
-        createRoom(grid, getEmptyPoint(grid));
-        return;
-    }
-
-    for (var x = startX; x < startX + width; x++) {
-        for (var y = startY; y < startY + height; y++) {
-            grid[x][y] = {
-                char: charMap.get('floor'),
-                visited: false,
-                lit: false,
-            }
-        }
-    }
-
-}
-
-function initGrid() {
-    let newGrid = [];
-    for (var i = 0; i < GRID_SIZE; i++) {
-        newGrid[i] = [];
-        for (var j = 0; j < GRID_SIZE; j++)
-            newGrid[i][j] = {
-                char: charMap.get('wall'),
-                visited: false,
-                lit: false
-            }
-    }
-    return newGrid;
-}
-
 function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
     let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
     let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
 
-    if (startX > GRID_SIZE - elementsWide) startX = GRID_SIZE - elementsWide;
-    if (startY > GRID_SIZE - elementsHigh) startY = GRID_SIZE - elementsHigh;
+    if (startX > g.GRID_SIZE - elementsWide) startX = g.GRID_SIZE - elementsWide;
+    if (startY > g.GRID_SIZE - elementsHigh) startY = g.GRID_SIZE - elementsHigh;
 
     const playerX = centerObject.x - startX;
     const playerY = centerObject.y - startY;
@@ -370,7 +259,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 }
 
 function updateMapView() {
-    drawGridSection(createGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid), charMap);
+    drawGridSection(createGridSection(g.VIEWPORT_WIDTH / g.ELEMENT_SIZE, g.VIEWPORT_HEIGHT / g.ELEMENT_SIZE, player, grid), charMap);
 
 }
 
@@ -404,11 +293,25 @@ function initKeyListener() {
     window.addEventListener("keydown", event => {
 
         switch (event.key) {
-            case " ":
+            case "m":
+            case "M":
+                drawEntireMap(grid, player, charMap);
+                break;
             case "i":
             case "I":
-                playerCommand('inventory')
-                break;
+                switch (gameState) {
+                    case 'MAZE': {
+                        drawInventory(items, player);
+                        gameState = 'INVENTORY';
+                        break;
+                    }
+                    case 'INVENTORY': {
+                        updateMapView(player, grid);
+                        gameState = 'MAZE';
+                        break;
+                    }
+                }
+
             case "5":
                 playerCommand('rest');
                 break;
@@ -440,10 +343,6 @@ function initKeyListener() {
             case "3":
                 playerCommand('SE');
                 break;
-            case "m":
-            case "M":
-                drawEntireMap(grid);
-                break;
             default:
                 console.log(event.key);
                 return;
@@ -454,9 +353,7 @@ function initKeyListener() {
     }, true);
 }
 
-function getRandom(max) {
-    return Math.floor(Math.random() * max);
-}
+
 
 
 

@@ -11,7 +11,7 @@ const messagesContext = document.getElementById('messages').getContext("2d");
 
 const charMap = new Map();
 
-charMap.set('wall', '\u25A7').set('player', '@').set('coin', '$')
+charMap.set('wall', '\u25A7').set('player', '@').set('floor', '\u2591');
 
 const grid = initGrid();
 
@@ -35,6 +35,15 @@ const itemTemplates = [
         pickupAction: "addToInventory",
         useAction: "eatFood"
     }
+];
+
+const monsterTemplates = [
+    {
+        name: "Rat",
+        char: "r",
+        prob: 900
+    }
+
 ];
 
 
@@ -89,9 +98,13 @@ const messages = {
 
 };
 
+
+
 player.setPosition(getEmptyPoint(grid));
 
 const mapItems = generateItemsArray();
+
+const monsters = generateMonstersArray();
 
 initKeyListener();
 
@@ -133,11 +146,40 @@ function generateItem(template) {
 
 }
 
+function generateMonster(template) {
+    let newMonster = Object.assign({}, template);
+    let point = getEmptyPoint(grid);
+    newMonster.x = point.x;
+    newMonster.y = point.y;
+    return newMonster;
+}
+
 function removeItem(item) {
-    grid[item.x][item.y].char = ' ';
+    grid[item.x][item.y].char = charMap.get('floor');
     mapItems.splice(mapItems.indexOf(item), 1);
 
 }
+
+function generateMonstersArray() {
+    let newMonsters = [];
+    const numberOfMonsters = 10 + getRandom(20);
+    for (let i = 0; i < numberOfMonsters; i++) {
+
+        let r = getRandom(1000);
+
+        monsterTemplates.forEach(m => {
+            if (m.prob >= r) {
+                newMonsters.push(generateMonster(m));
+            }
+        })
+
+
+    }
+
+    return newMonsters;
+
+}
+
 
 function generateItemsArray() {
 
@@ -219,7 +261,7 @@ function getEmptyPoint(grid) {
     while (true) {
         const randX = 1 + getRandom(GRID_SIZE - 2);
         const randY = 1 + getRandom(GRID_SIZE - 2);
-        if (grid[randX][randY].char == ' ') return { x: randX, y: randY }
+        if (grid[randX][randY].char == charMap.get('floor')) return { x: randX, y: randY }
     }
 }
 
@@ -231,7 +273,7 @@ function createPassage(grid, startingPoint) {
     while (x > 2 && x < GRID_SIZE - 2 && y > 2 && y < GRID_SIZE - 2 && getRandom(100) < 99) {
         while (getRandom(5) != 0) {
             grid[x][y] = {
-                char: ' ',
+                char: charMap.get('floor'),
                 visited: false,
                 lit: false
             }
@@ -260,7 +302,7 @@ function createRoom(grid, startingPoint) {
     for (var x = startX; x < startX + width; x++) {
         for (var y = startY; y < startY + height; y++) {
             grid[x][y] = {
-                char: ' ',
+                char: charMap.get('floor'),
                 visited: false,
                 lit: false,
             }
@@ -304,11 +346,12 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
             mapItems.forEach(i => {
                 if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
             });
+            monsters.forEach(m => {
+                if (checkOverlap(m, { x: startX + x, y: startY + y })) gridSection[x][y].char = m.char;
+            });
 
         }
     }
-
-
 
     gridSection[playerX][playerY] = {
         char: charMap.get('player'),
@@ -355,7 +398,7 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
 
 function drawGridSection(gridSection) {
     mapViewContext.fillStyle = "black";
-    mapViewContext.font = "18pt courier new";
+    mapViewContext.font = "16pt courier new";
     mapViewContext.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
     mapViewContext.fillStyle = "white";
 
@@ -363,12 +406,12 @@ function drawGridSection(gridSection) {
         for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
 
             if (gridSection[x][y].lit) {
-                mapViewContext.fillStyle = 'silver';
+                mapViewContext.fillStyle = '#CCC';
                 mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
 
             }
             else if (gridSection[x][y].visited) {
-                mapViewContext.fillStyle = 'dimgray';
+                mapViewContext.fillStyle = '#444';
                 mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
             }
         }
@@ -435,7 +478,7 @@ function drawEntireMap(grid) {
     updateMapView();
     const startX = VIEWPORT_WIDTH / 2 - GRID_SIZE;
     const startY = 30;
-    mapViewContext.fillStyle = "black";
+    mapViewContext.fillStyle = '#222'
     mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
     mapViewContext.strokeStyle = "silver";
     mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
@@ -444,7 +487,7 @@ function drawEntireMap(grid) {
     for(let x = 0; x < GRID_SIZE; x++) {
         for (let y = 0; y < GRID_SIZE; y++) {
 
-            if (grid[x][y].char == ' ') {
+            if (grid[x][y].char == charMap.get('floor')) {
                 mapViewContext.fillRect(startX + (x * 2), startY + (y * 2), 2, 2);
             }
 

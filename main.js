@@ -41,10 +41,20 @@ const monsterTemplates = [
     {
         name: "Rat",
         char: "r",
-        prob: 200,
+        prob: 400,
         attack: "bites",
         moves: true,
-        aggressive: false
+        aggressive: false,
+        speed: 100
+    },
+    {
+        name: "Slime",
+        char: "S",
+        prob: 500,
+        attack: "slimes",
+        moves: true,
+        aggressive: true,
+        speed: 50,
     }
 
 ];

@@ -7,6 +7,8 @@ To be implemented:
 [ ] monsters<br>
 [ ] items<br>
 [ ] more levels<br>
+[ ] player stats<br>
+[ ] inventory<br>
 
 
-![bild](https://user-images.githubusercontent.com/109295151/222748965-6ec42ea0-946d-41c0-b622-4b209701fb75.png)
+![bild](https://user-images.githubusercontent.com/109295151/223055255-2c295ebf-fa86-48b7-8d73-32cd291a6e54.png)

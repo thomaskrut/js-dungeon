@@ -411,6 +411,10 @@ function initKeyListener() {
             case "3":
                 playerCommand('SE');
                 break;
+            case "m":
+            case "M":
+                drawEntireMap(grid);
+                break;
             default:
                 console.log(event.key);
                 return; // 
@@ -423,6 +427,29 @@ function initKeyListener() {
 
 function getRandom(max) {
     return Math.floor(Math.random() * max);
+}
+
+function drawEntireMap(grid) {
+
+    updateMapView(player, grid);
+    const startX = 50;
+    const startY = 30;
+    mapViewContext.fillStyle = "dimgray";
+    mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
+    mapViewContext.strokeStyle = "silver";
+    mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
+
+    mapViewContext.fillStyle = "black";
+    for(let x = 0; x < GRID_SIZE; x++) {
+        for (let y = 0; y < GRID_SIZE; y++) {
+
+            if (grid[x][y].char == ' ') {
+                mapViewContext.fillRect(startX + (x * 2), startY + (y * 2), 2, 2);
+            }
+
+        }
+    }
+
 }
 
 

@@ -1,3 +1,9 @@
+import { player } from "./src/player.js";
+import { monsterTemplates, itemTemplates } from "./src/templates.js";
+import { drawEntireMap, drawGridSection, drawInventory, drawMessages } from "./src/drawing.js";
+import { messages } from "./src/messages.js";
+import { charMap } from "./src/charmap.js";
+
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 480;
 const MESSAGES_HEIGHT = 100;
@@ -8,126 +14,15 @@ let gameState = 'MAZE';
 
 let litAreaSize = 5;
 
-const mapViewContext = document.getElementById('mapView').getContext("2d");
-const messagesContext = document.getElementById('messages').getContext("2d");
 
-const charMap = new Map();
 
-charMap.set('wall', '\u25A7').set('player', '@').set('floor', '\u2591');
+
 
 const grid = initGrid();
 
 generateMap(grid);
 
-const itemTemplates = [
-    {
-        name: "Gold",
-        prefix: "pieces of",
-        char: "$",
-        prob: 900,
-        value: 0, maxValue: 500, minValue: 5,
-        pickupAction: "addGold"
-    },
-    {
-        name: "Apple",
-        prefix: "an",
-        char: "õ",
-        prob: 850,
-        value: 10, minValue: 10, maxValue: 10,
-        pickupAction: "addToInventory",
-        useAction: "eatFood"
-    },
-    {
-        name: "Candy",
-        prefix: "a",
-        char: "¤",
-        prob: 700,
-        value: 10, minValue: 1, maxValue: 10,
-        pickupAction: "addToInventory",
-        useAction: "throwItem"
-    }
-];
 
-const monsterTemplates = [
-    {
-        name: "Rat",
-        char: "r",
-        prob: 400,
-        attack: "bites",
-        str: 3,
-        hp: 10,
-        moves: true,
-        aggressive: false,
-        speed: 10
-    },
-    {
-        name: "Slime",
-        char: "S",
-        prob: 500,
-        attack: "slimes",
-        str: 2,
-        hp: 40,
-        moves: true,
-        aggressive: true,
-        speed: 60,
-    }
-
-];
-
-
-const player = {
-    x: 0,
-    y: 0,
-    speed: 10,
-    gold: 0,
-    hp: 30,
-    str: 12,
-    hunger: 0,
-
-    inventory: [],
-
-    setPosition: function (pos) {
-        this.x = pos.x;
-        this.y = pos.y;
-    },
-
-    earFood: function (item) {
-        this.hunger = - item.value;
-    },
-
-    addGold: function (item) {
-        this.gold += item.value;
-        messages.addMessage("You found " + item.value + " gold!");
-    },
-
-    addToInventory: function (item) {
-        this.inventory.push(item);
-        console.log(this.inventory);
-        messages.addMessage("You found " + item.prefix + " " + item.name.toLowerCase());
-    }
-
-}
-
-const messages = {
-
-    newMessages: [],
-    messageColour: ["white", "silver", "gray", "dimgray", "dimgray", "dimgray"],
-    recentMessages: [],
-
-    addMessage: function (message) {
-        this.newMessages.unshift(message);
-        this.updateRecent();
-    },
-
-    updateRecent: function () {
-        if (this.newMessages.length > 0) {
-            if (messages.recentMessages.length > 6) messages.recentMessages.pop();
-            this.recentMessages.unshift(this.newMessages.pop())
-        }
-    }
-
-
-};
 
 
 
@@ -143,46 +38,8 @@ updateMapView(player, grid);
 
 messages.addMessage("Welcome!");
 messages.updateRecent();
-drawMessages(messages);
+drawMessages(player, messages);
 
-function drawInventory(items) {
-    updateMapView();
-    const startX = VIEWPORT_WIDTH / 2 - GRID_SIZE;
-    const startY = 30;
-    mapViewContext.font = "12px courier new";
-    mapViewContext.fillStyle = '#222'
-    mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
-    mapViewContext.strokeStyle = "silver";
-    mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
-    mapViewContext.fillStyle = '#CCC'
-    mapViewContext.fillText("Inventory", startX + 160, startY + 30);
-
-
-
-    player.inventory.forEach((i, index) => {
-
-        mapViewContext.fillText(i.name, startX, 100 + (startY * index));
-
-    });
-
-
-}
-
-function drawMessages(messages) {
-
-    messagesContext.fillStyle = "black";
-    messagesContext.font = "12px courier new";
-    messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
-
-    messages.recentMessages.forEach((m, i) => {
-        messagesContext.fillStyle = "silver";
-        messagesContext.fillText(m, 10, (i + 1) * 14);
-    });
-
-    messagesContext.fillStyle = messages.messageColour[0];
-    messagesContext.fillText("X: " + player.x + " | Y: " + player.y, VIEWPORT_WIDTH - 160, 20)
-    messagesContext.fillText("HP: " + player.hp, VIEWPORT_WIDTH - 160, 40)
-}
 
 function generateItem(template) {
 
@@ -359,7 +216,7 @@ function playerCommand(command) {
                 gameState = 'INVENTORY';
             }
 
-            drawMessages(messages);
+            drawMessages(player, messages);
             break;
         }
 
@@ -513,7 +370,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 }
 
 function updateMapView() {
-    drawGridSection(createGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
+    drawGridSection(createGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid), charMap);
 
 }
 
@@ -536,32 +393,6 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
         createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
     }
 
-}
-
-function drawGridSection(gridSection) {
-    mapViewContext.fillStyle = "black";
-    mapViewContext.font = "16pt courier new";
-    mapViewContext.fillRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-    mapViewContext.fillStyle = "white";
-
-    for (var x = 0; x < VIEWPORT_WIDTH / ELEMENT_SIZE; x++) {
-        for (var y = 0; y < VIEWPORT_HEIGHT / ELEMENT_SIZE; y++) {
-
-            if (gridSection[x][y].lit) {
-                mapViewContext.fillStyle = '#CCC';
-                mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-
-            }
-            else if (gridSection[x][y].visited) {
-                mapViewContext.fillStyle = '#444';
-                if (gridSection[x][y].char != charMap.get('wall')) {
-                    mapViewContext.fillText(charMap.get('floor'), x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-                } else {
-                    mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
-                }
-            }
-        }
-    }
 }
 
 function checkOverlap(object1, object2) {
@@ -627,32 +458,7 @@ function getRandom(max) {
     return Math.floor(Math.random() * max);
 }
 
-function drawEntireMap(grid) {
 
-    updateMapView();
-    const startX = VIEWPORT_WIDTH / 2 - GRID_SIZE;
-    const startY = 30;
-    mapViewContext.fillStyle = '#222'
-    mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
-    mapViewContext.strokeStyle = "silver";
-    mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
-
-    mapViewContext.fillStyle = "gray";
-    for (let x = 0; x < GRID_SIZE; x++) {
-        for (let y = 0; y < GRID_SIZE; y++) {
-
-            if (grid[x][y].char == charMap.get('floor')) {
-                mapViewContext.fillRect(startX + (x * 2), startY + (y * 2), 2, 2);
-            }
-
-        }
-    }
-
-    mapViewContext.fillStyle = "red";
-    mapViewContext.strokeStyle = "red";
-    mapViewContext.fillRect(startX + (player.x * 2), startY + (player.y * 2), 2, 2);
-    mapViewContext.strokeRect(startX + (player.x * 2) - VIEWPORT_WIDTH / ELEMENT_SIZE / 2, startY + (player.y * 2) - VIEWPORT_HEIGHT / ELEMENT_SIZE / 2, VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE)
-}
 
 
 

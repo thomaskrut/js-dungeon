@@ -1,6 +1,6 @@
+const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 480;
 const MESSAGES_HEIGHT = 100;
-const VIEWPORT_WIDTH = 800;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
@@ -22,7 +22,7 @@ const itemTemplates = [
         name: "Gold",
         prefix: "pieces of",
         char: "$",
-        prob: 100,
+        prob: 900,
         value: 0, maxValue: 500, minValue: 5,
         pickupAction: "addGold"
     },
@@ -71,7 +71,7 @@ const player = {
 const messages = {
 
     newMessages: [],
-    messageColour: ["white", "silver", "gray", "dimgray"],
+    messageColour: ["white", "silver", "gray", "dimgray", "dimgray", "dimgray"],
     recentMessages: [],
 
     addMessage: function (message) {
@@ -81,7 +81,7 @@ const messages = {
 
     updateRecent: function () {
         if (this.newMessages.length > 0) {
-            if (messages.recentMessages.length > 3) messages.recentMessages.pop();
+            if (messages.recentMessages.length > 6) messages.recentMessages.pop();
             this.recentMessages.unshift(this.newMessages.pop())
         }
     }
@@ -104,12 +104,12 @@ drawMessages(messages);
 function drawMessages(messages) {
 
     messagesContext.fillStyle = "black";
-    messagesContext.font = "16px courier new";
+    messagesContext.font = "12px courier new";
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
 
     messages.recentMessages.forEach((m, i) => {
         messagesContext.fillStyle = messages.messageColour[i];
-        messagesContext.fillText(m, 10, (i + 1) * 20);
+        messagesContext.fillText(m, 10, (i + 1) * 14);
     });
 
     messagesContext.fillStyle = messages.messageColour[0];
@@ -192,17 +192,12 @@ function generateMap(grid) {
 
     createRoom(grid, { x: GRID_SIZE / 2, y: GRID_SIZE / 2 })
 
-    const numberOfIterations = getRandom(2) + 5;
+    const numberOfIterations = 4;
 
     for (let i = 0; i < numberOfIterations; i++) {
         createRoom(grid, getEmptyPoint(grid));
-        createRoom(grid, getEmptyPoint(grid));
-
-        createPassage(grid, getEmptyPoint(grid));
+        createRoom(grid, createPassage(grid, getEmptyPoint(grid)));
     }
-
-
-
 }
 
 function getRandomDirection() {
@@ -240,7 +235,7 @@ function createPassage(grid, startingPoint) {
         }
         direction = getRandomDirection();
     }
-
+    return {x: x, y: y};
 
 }
 
@@ -326,7 +321,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
     return gridSection;
 }
 
-function updateMapView(player, grid) {
+function updateMapView() {
     drawGridSection(createGridSection(VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE, player, grid));
 
 }
@@ -431,7 +426,7 @@ function getRandom(max) {
 
 function drawEntireMap(grid) {
 
-    updateMapView(player, grid);
+    updateMapView();
     const startX = 50;
     const startY = 30;
     mapViewContext.fillStyle = "dimgray";
@@ -450,6 +445,10 @@ function drawEntireMap(grid) {
         }
     }
 
+    mapViewContext.fillStyle = "red";
+    mapViewContext.strokeStyle = "red";
+    mapViewContext.fillRect(startX + (player.x * 2), startY + (player.y * 2), 2, 2);
+    mapViewContext.strokeRect(startX + (player.x * 2) - VIEWPORT_WIDTH / ELEMENT_SIZE / 2, startY + (player.y * 2) - VIEWPORT_HEIGHT / ELEMENT_SIZE / 2, VIEWPORT_WIDTH / ELEMENT_SIZE, VIEWPORT_HEIGHT / ELEMENT_SIZE)
 }
 
 

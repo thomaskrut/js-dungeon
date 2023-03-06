@@ -1,7 +1,7 @@
 export { generateMap, getEmptyPoint, initGrid };
 
 import { globals as g } from "./globals.js";
-import { getRandom } from "./util.js";
+import { getRandom, getEmptyPoint, getRandomDirection } from "./util.js";
 
 function generateMap(grid, charMap) {
 
@@ -12,29 +12,6 @@ function generateMap(grid, charMap) {
     for (let i = 0; i < numberOfIterations; i++) {
         createRoom(grid, charMap, getEmptyPoint(grid, charMap));
         createRoom(grid, charMap, createPassage(grid, charMap, getEmptyPoint(grid, charMap)));
-    }
-}
-
-function getRandomDirection(modX, modY) {
-    if (modX == 0) {
-        switch (getRandom(2)) {
-            case 0: return { modX: 1, modY: 0 }
-            case 1: return { modX: -1, modY: 0 }
-        }
-    } else if (modY == 0) {
-        switch (getRandom(2)) {
-            case 0: return { modX: 0, modY: 1 }
-            case 1: return { modX: 0, modY: -1 }
-        }
-        console.log("error");
-    }
-}
-
-function getEmptyPoint(grid, charMap) {
-    while (true) {
-        const randX = 1 + getRandom(g.GRID_SIZE - 2);
-        const randY = 1 + getRandom(g.GRID_SIZE - 2);
-        if (grid[randX][randY].char == charMap.get('floor')) return { x: randX, y: randY }
     }
 }
 

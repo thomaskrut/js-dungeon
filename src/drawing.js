@@ -7,10 +7,10 @@ import { player } from "./player.js";
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
-const interval = setInterval(() => {
+/* const interval = setInterval(() => {
     messages.addMessage(" ");
     drawMessages(player, messages);
-}, 1500)
+}, 1500) */
 
 function drawInventory(items, player) {
     

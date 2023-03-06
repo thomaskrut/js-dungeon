@@ -5,7 +5,8 @@ import { messages } from "./src/messages.js";
 import { charMap } from "./src/charmap.js";
 import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
 import { globals as g } from "./src/globals.js";
-import { getRandom } from "./src/util.js";
+import { getRandom, checkOverlap } from "./src/util.js";
+import { generateItemsArray } from "./src/items.js";
 
 let gameState = 'MAZE';
 
@@ -17,7 +18,7 @@ generateMap(grid, charMap);
 
 player.setPosition(getEmptyPoint(grid, charMap));
 
-const items = generateItemsArray();
+const items = generateItemsArray(grid, charMap, player);
 
 const monsters = generateMonstersArray();
 
@@ -30,21 +31,7 @@ messages.updateRecent();
 drawMessages(player, messages);
 
 
-function generateItem(template) {
 
-    let newItem = Object.assign({}, template);
-
-    let point = getEmptyPoint(grid, charMap);
-    newItem.x = point.x;
-    newItem.y = point.y;
-    newItem.value = template.minValue + getRandom(template.maxValue - template.minValue);
-    newItem.pickUp = function () {
-        player[template.pickupAction]?.call(player, newItem, messages);
-        removeItem(newItem);
-    }
-    return newItem;
-
-}
 
 function generateMonster(template) {
     let newMonster = Object.assign({}, template);
@@ -54,12 +41,6 @@ function generateMonster(template) {
     newMonster.hp = template.hp + getRandom(5);
     newMonster.moveCounter = getRandom(template.speed);
     return newMonster;
-}
-
-function removeItem(item) {
-    grid[item.x][item.y].char = charMap.get('floor');
-    items.splice(items.indexOf(item), 1);
-
 }
 
 function generateMonstersArray() {
@@ -79,29 +60,6 @@ function generateMonstersArray() {
     }
 
     return newMonsters;
-
-}
-
-function generateItemsArray() {
-
-    let newItems = [];
-
-    const numberOfItems = 10 + getRandom(20);
-
-    for (let i = 0; i < numberOfItems; i++) {
-
-        let r = getRandom(1000);
-
-        itemTemplates.forEach(i => {
-            if (i.prob >= r) {
-                newItems.push(generateItem(i));
-            }
-        })
-
-
-    }
-
-    return newItems;
 
 }
 
@@ -282,10 +240,6 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
         createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
     }
 
-}
-
-function checkOverlap(object1, object2) {
-    return (object1.x == object2.x && object1.y == object2.y);
 }
 
 function initKeyListener() {

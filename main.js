@@ -4,7 +4,7 @@ const MESSAGES_HEIGHT = 100;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
-
+let gameState = 'MAZE';
 
 let litAreaSize = 5;
 
@@ -32,10 +32,19 @@ const itemTemplates = [
         name: "Apple",
         prefix: "an",
         char: "õ",
-        prob: 50,
+        prob: 850,
         value: 10, minValue: 10, maxValue: 10,
         pickupAction: "addToInventory",
         useAction: "eatFood"
+    },
+    {
+        name: "Candy",
+        prefix: "a",
+        char: "¤",
+        prob: 700,
+        value: 10, minValue: 1, maxValue: 10,
+        pickupAction: "addToInventory",
+        useAction: "throwItem"
     }
 ];
 
@@ -45,6 +54,8 @@ const monsterTemplates = [
         char: "r",
         prob: 400,
         attack: "bites",
+        str: 3,
+        hp: 10,
         moves: true,
         aggressive: false,
         speed: 10
@@ -54,6 +65,8 @@ const monsterTemplates = [
         char: "S",
         prob: 500,
         attack: "slimes",
+        str: 2,
+        hp: 40,
         moves: true,
         aggressive: true,
         speed: 60,
@@ -67,6 +80,8 @@ const player = {
     y: 0,
     speed: 10,
     gold: 0,
+    hp: 30,
+    str: 12,
     hunger: 0,
 
     inventory: [],
@@ -130,6 +145,29 @@ messages.addMessage("Welcome!");
 messages.updateRecent();
 drawMessages(messages);
 
+function drawInventory(items) {
+    updateMapView();
+    const startX = VIEWPORT_WIDTH / 2 - GRID_SIZE;
+    const startY = 30;
+    mapViewContext.font = "12px courier new";
+    mapViewContext.fillStyle = '#222'
+    mapViewContext.fillRect(startX, startY, GRID_SIZE * 2, GRID_SIZE * 2);
+    mapViewContext.strokeStyle = "silver";
+    mapViewContext.strokeRect(startX - 1, startY - 1, (GRID_SIZE * 2 + 2), (GRID_SIZE * 2) + 2);
+    mapViewContext.fillStyle = '#CCC'
+    mapViewContext.fillText("Inventory", startX + 160, startY + 30);
+
+
+
+    player.inventory.forEach((i, index) => {
+
+        mapViewContext.fillText(i.name, startX, 100 + (startY * index));
+
+    });
+
+
+}
+
 function drawMessages(messages) {
 
     messagesContext.fillStyle = "black";
@@ -137,13 +175,13 @@ function drawMessages(messages) {
     messagesContext.fillRect(0, 0, VIEWPORT_WIDTH, MESSAGES_HEIGHT);
 
     messages.recentMessages.forEach((m, i) => {
-        messagesContext.fillStyle = messages.messageColour[i];
+        messagesContext.fillStyle = "silver";
         messagesContext.fillText(m, 10, (i + 1) * 14);
     });
 
     messagesContext.fillStyle = messages.messageColour[0];
     messagesContext.fillText("X: " + player.x + " | Y: " + player.y, VIEWPORT_WIDTH - 160, 20)
-    messagesContext.fillText("Gold: " + player.gold, VIEWPORT_WIDTH - 160, 40)
+    messagesContext.fillText("HP: " + player.hp, VIEWPORT_WIDTH - 160, 40)
 }
 
 function generateItem(template) {
@@ -167,6 +205,7 @@ function generateMonster(template) {
     let point = getEmptyPoint(grid);
     newMonster.x = point.x;
     newMonster.y = point.y;
+    newMonster.hp = template.hp + getRandom(5);
     newMonster.moveCounter = getRandom(template.speed);
     return newMonster;
 }
@@ -196,7 +235,6 @@ function generateMonstersArray() {
     return newMonsters;
 
 }
-
 
 function generateItemsArray() {
 
@@ -231,36 +269,37 @@ function moveMonsters(monsters, player, grid) {
                 m.moveCounter--;
                 if (m.moveCounter == 0) {
                     grid[m.x][m.y].char = charMap.get('floor');
-                let modX = 0;
-                let modY = 0;
-                if (player.x > m.x) modX = 1;
-                if (player.x < m.x) modX = -1;
-                if (player.y > m.y) modY = 1;
-                if (player.y < m.y) modY = -1;
-                let counter = 0;
-                while (grid[m.x + modX][m.y + modY].char != charMap.get('floor')) {
-                    modX = getRandom(2) - 1;
-                    modY = getRandom(2) - 1;
-                    counter++;
-                    if (counter == 10) {
+                    let modX = 0;
+                    let modY = 0;
+                    if (player.x > m.x) modX = 1;
+                    if (player.x < m.x) modX = -1;
+                    if (player.y > m.y) modY = 1;
+                    if (player.y < m.y) modY = -1;
+                    let counter = 0;
+                    while (grid[m.x + modX][m.y + modY].char != charMap.get('floor')) {
+                        modX = getRandom(2) - 1;
+                        modY = getRandom(2) - 1;
+                        counter++;
+                        if (counter == 20) {
+                            modX = 0;
+                            modY = 0;
+                            break;
+                        }
+                    }
+
+                    if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
+                        messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
+                        player.hp -= m.str;
                         modX = 0;
                         modY = 0;
-                        break;
                     }
+
+                    m.x = m.x + modX;
+                    m.y = m.y + modY;
+                    grid[m.x][m.y].char = m.char;
+                    m.moveCounter = m.speed;
                 }
 
-                if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
-                    messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
-                    modX = 0;
-                    modY = 0;
-                }
-
-                m.x = m.x + modX;
-                m.y = m.y + modY;
-                grid[m.x][m.y].char = m.char;
-                m.moveCounter = m.speed;
-                }
-                
 
             }
 
@@ -268,46 +307,71 @@ function moveMonsters(monsters, player, grid) {
     }
 }
 
-
-
 function playerCommand(command) {
 
-    if (command.length <= 2) {
-        let modX = 0;
-        let modY = 0;
-        if (command.includes('N')) modY = -1;
-        if (command.includes('S')) modY = 1;
-        if (command.includes('E')) modX = 1;
-        if (command.includes('W')) modX = -1;
+    switch (gameState) {
 
-        if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
-            monsters.forEach(m => {
-                if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
-                    messages.addMessage("You hit the " + m.name)
-                    modX = 0;
-                    modY = 0;
+        case 'MAZE': {
+
+            if (command.length <= 2) {
+                let modX = 0;
+                let modY = 0;
+                if (command.includes('N')) modY = -1;
+                if (command.includes('S')) modY = 1;
+                if (command.includes('E')) modX = 1;
+                if (command.includes('W')) modX = -1;
+
+                if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
+                    monsters.forEach(m => {
+                        if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
+                            messages.addMessage("You hit the " + m.name)
+                            m.hp -= player.str;
+                            if (m.hp <= 0) {
+                                messages.addMessage("You killed the " + m.name);
+                                grid[m.x][m.y].char = charMap.get('floor');
+                                monsters.splice(monsters.indexOf(m), 1);
+                            }
+                            modX = 0;
+                            modY = 0;
+                        }
+                    });
+                    player.x += modX;
+                    player.y += modY;
+                    moveMonsters(monsters, player, grid);
+                    updateMapView(player, grid);
                 }
-            });
-            player.x += modX;
-            player.y += modY;
-            moveMonsters(monsters, player, grid);
-            updateMapView(player, grid);
+
+                items.forEach(i => {
+                    if (checkOverlap(i, player)) {
+                        i.pickUp();
+                    }
+                })
+
+            }
+
+            if (command == 'rest') {
+                moveMonsters(monsters, player, grid);
+                updateMapView(player, grid);
+            }
+
+            if (command == 'inventory') {
+                drawInventory(items);
+                gameState = 'INVENTORY';
+            }
+
+            drawMessages(messages);
+            break;
         }
 
-        items.forEach(i => {
-            if (checkOverlap(i, player)) {
-                i.pickUp();
+        case 'INVENTORY': {
+            if (command == 'inventory') {
+                updateMapView(player, grid);
+                gameState = 'MAZE';
             }
-        })
-
+            break;
+        }
     }
 
-    if (command == 'rest') {
-        moveMonsters(monsters, player, grid);
-        updateMapView(player, grid);
-    }
-
-    drawMessages(messages);
 }
 
 function generateMap(grid) {
@@ -426,7 +490,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
             items.forEach(i => {
                 if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
             });
-            
+
 
         }
     }
@@ -509,6 +573,11 @@ function initKeyListener() {
     window.addEventListener("keydown", event => {
 
         switch (event.key) {
+            case " ":
+            case "i":
+            case "I":
+                playerCommand('inventory')
+                break;
             case "5":
                 playerCommand('rest');
                 break;
@@ -546,7 +615,7 @@ function initKeyListener() {
                 break;
             default:
                 console.log(event.key);
-                return; // 
+                return;
         }
         console.log(event.key);
 

@@ -56,7 +56,7 @@ const monsterTemplates = [
         attack: "slimes",
         moves: true,
         aggressive: true,
-        speed: 20,
+        speed: 60,
     }
 
 ];
@@ -426,9 +426,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
             items.forEach(i => {
                 if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
             });
-            monsters.forEach(m => {
-                if (checkOverlap(m, { x: startX + x, y: startY + y })) gridSection[x][y].char = m.char;
-            });
+            
 
         }
     }
@@ -492,7 +490,11 @@ function drawGridSection(gridSection) {
             }
             else if (gridSection[x][y].visited) {
                 mapViewContext.fillStyle = '#444';
-                mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+                if (gridSection[x][y].char != charMap.get('wall')) {
+                    mapViewContext.fillText(charMap.get('floor'), x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+                } else {
+                    mapViewContext.fillText(gridSection[x][y].char, x * ELEMENT_SIZE, y * ELEMENT_SIZE);
+                }
             }
         }
     }

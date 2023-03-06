@@ -4,6 +4,8 @@ const MESSAGES_HEIGHT = 100;
 const ELEMENT_SIZE = 20;
 const GRID_SIZE = 200;
 
+
+
 let litAreaSize = 5;
 
 const mapViewContext = document.getElementById('mapView').getContext("2d");
@@ -45,7 +47,7 @@ const monsterTemplates = [
         attack: "bites",
         moves: true,
         aggressive: false,
-        speed: 100
+        speed: 10
     },
     {
         name: "Slime",
@@ -54,7 +56,7 @@ const monsterTemplates = [
         attack: "slimes",
         moves: true,
         aggressive: true,
-        speed: 50,
+        speed: 20,
     }
 
 ];
@@ -63,6 +65,7 @@ const monsterTemplates = [
 const player = {
     x: 0,
     y: 0,
+    speed: 10,
     gold: 0,
     hunger: 0,
 
@@ -115,7 +118,7 @@ const messages = {
 
 player.setPosition(getEmptyPoint(grid));
 
-const mapItems = generateItemsArray();
+const items = generateItemsArray();
 
 const monsters = generateMonstersArray();
 
@@ -164,12 +167,13 @@ function generateMonster(template) {
     let point = getEmptyPoint(grid);
     newMonster.x = point.x;
     newMonster.y = point.y;
+    newMonster.moveCounter = getRandom(template.speed);
     return newMonster;
 }
 
 function removeItem(item) {
     grid[item.x][item.y].char = charMap.get('floor');
-    mapItems.splice(mapItems.indexOf(item), 1);
+    items.splice(items.indexOf(item), 1);
 
 }
 
@@ -219,42 +223,49 @@ function generateItemsArray() {
 
 function moveMonsters(monsters, player, grid) {
 
-    monsters.forEach(m => {
+    for (let tick = 0; tick < player.speed; tick++) {
 
-        if (m.moves) {
-            grid[m.x][m.y].char = charMap.get('floor');
-            let modX = 0;
-            let modY = 0;
-            if (player.x > m.x) modX = 1;
-            if (player.x < m.x) modX = -1;
-            if (player.y > m.y) modY = 1;
-            if (player.y < m.y) modY = -1;
-            let counter = 0;
-            while (grid[m.x + modX][m.y + modY].char != charMap.get('floor')) {
-                modX = getRandom(2) - 1;
-                modY = getRandom(2) - 1;
-                counter++;
-                if (counter == 10) {
+        monsters.forEach(m => {
+
+            if (m.moves) {
+                m.moveCounter--;
+                if (m.moveCounter == 0) {
+                    grid[m.x][m.y].char = charMap.get('floor');
+                let modX = 0;
+                let modY = 0;
+                if (player.x > m.x) modX = 1;
+                if (player.x < m.x) modX = -1;
+                if (player.y > m.y) modY = 1;
+                if (player.y < m.y) modY = -1;
+                let counter = 0;
+                while (grid[m.x + modX][m.y + modY].char != charMap.get('floor')) {
+                    modX = getRandom(2) - 1;
+                    modY = getRandom(2) - 1;
+                    counter++;
+                    if (counter == 10) {
+                        modX = 0;
+                        modY = 0;
+                        break;
+                    }
+                }
+
+                if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
+                    messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
                     modX = 0;
                     modY = 0;
-                    break;
                 }
+
+                m.x = m.x + modX;
+                m.y = m.y + modY;
+                grid[m.x][m.y].char = m.char;
+                m.moveCounter = m.speed;
+                }
+                
+
             }
-            
-            if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
-                messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
-                modX = 0;
-                modY = 0;
-            }
-            
-            m.x = m.x + modX;
-            m.y = m.y + modY;
-            grid[m.x][m.y].char = m.char;
 
-        }
-
-    });
-
+        });
+    }
 }
 
 
@@ -271,7 +282,7 @@ function playerCommand(command) {
 
         if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
             monsters.forEach(m => {
-                if (checkOverlap({x: player.x + modX, y: player.y + modY}, m)) {
+                if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
                     messages.addMessage("You hit the " + m.name)
                     modX = 0;
                     modY = 0;
@@ -283,7 +294,7 @@ function playerCommand(command) {
             updateMapView(player, grid);
         }
 
-        mapItems.forEach(i => {
+        items.forEach(i => {
             if (checkOverlap(i, player)) {
                 i.pickUp();
             }
@@ -412,7 +423,7 @@ function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
         for (var y = 0; y < elementsHigh; y++) {
             gridSection[x][y] = grid[startX + x][startY + y];
             gridSection[x][y].lit = false;
-            mapItems.forEach(i => {
+            items.forEach(i => {
                 if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
             });
             monsters.forEach(m => {

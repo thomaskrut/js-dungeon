@@ -260,6 +260,13 @@ function playerCommand(command) {
         if (command.includes('W')) modX = -1;
 
         if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
+            monsters.forEach(m => {
+                if (checkOverlap({x: player.x + modX, y: player.y + modY}, m)) {
+                    messages.addMessage("You hit the " + m.name)
+                    modX = 0;
+                    modY = 0;
+                }
+            });
             player.x += modX;
             player.y += modY;
             moveMonsters(monsters, player, grid);

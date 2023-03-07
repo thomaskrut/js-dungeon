@@ -14,6 +14,7 @@ let gameState = 'INTRO';
 let selectedMenuItem = 0;
 let selectedItem;
 let numberOfMenuItems = 0;
+let currentMenu;
 
 let litAreaSize = 5;
 
@@ -245,8 +246,11 @@ function initKeyListener() {
                         }
                         if (selectedMenuItem == 1) {
                             player.inventory.splice(player.inventory.indexOf(selectedItem), 1);
-                           // add item to map
                             messages.addMessage("You dropped an " + selectedItem.name.toLowerCase());
+                            let pos = getEmptyPoint(grid, charMap);
+                            selectedItem.x = player.x;
+                            selectedItem.y = player.y;
+                            items.push(selectedItem);
                         }
                         if (selectedMenuItem == 3) {
 
@@ -318,7 +322,7 @@ function initKeyListener() {
                     case "I":
                         selectedMenuItem = 0;
                         numberOfMenuItems = player.inventory.length;
-                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        drawMenu(player.inventory, selectedMenuItem, 'INVENTORY');
                         gameState = 'INVENTORY';
                         break;
 

@@ -1,4 +1,4 @@
-export {drawGridSection, drawMessages, drawMenu, drawEntireMap};
+export { drawGridSection, drawMessages, drawMenu, drawEntireMap };
 
 import { globals as g } from "./globals.js";
 import { messages } from "./messages.js";
@@ -8,29 +8,26 @@ const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
 function drawMenu(menuItems, selectedItem, title) {
-    
-    const startX = g.VIEWPORT_WIDTH / 2 - g.GRID_SIZE;
+
+    const startX = 30;
     const startY = 30;
-    mapViewContext.font = "12px courier new";
+    const LEFT_MARGIN = 10;
+    mapViewContext.font = "14px courier new";
     mapViewContext.fillStyle = '#222'
-    mapViewContext.fillRect(startX, startY, g.GRID_SIZE * 2, g.GRID_SIZE * 2);
+    mapViewContext.fillRect(startX, startY, g.VIEWPORT_WIDTH / 3, g.VIEWPORT_HEIGHT - 60);
     mapViewContext.strokeStyle = "silver";
-    mapViewContext.strokeRect(startX - 1, startY - 1, (g.GRID_SIZE * 2 + 2), (g.GRID_SIZE * 2) + 2);
+   
     mapViewContext.fillStyle = '#CCC'
-    mapViewContext.fillText(title, startX + 160, startY + 30);
-
-
+    mapViewContext.fillText(title, startX + LEFT_MARGIN, startY + 30);
 
     menuItems.forEach((i, index) => {
-        if (index == selectedItem) mapViewContext.fillText(">" + index + ": " + i.name, startX, 100 + (startY * index));
-        else mapViewContext.fillText(" " + index + ": " + i.name, startX, 100 + (startY * index));
+        if (index == selectedItem) mapViewContext.fillText("> " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
+        else mapViewContext.fillText("  " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
 
     });
 
 
 }
-
-
 
 function drawMessages(player, messages) {
 
@@ -46,7 +43,7 @@ function drawMessages(player, messages) {
     messagesContext.fillStyle = "silver";
     messagesContext.fillText("X: " + player.x + " | Y: " + player.y, g.VIEWPORT_WIDTH - 160, 20)
     messagesContext.fillText("HP: " + player.hp, g.VIEWPORT_WIDTH - 160, 40)
-   
+
 }
 
 function drawGridSection(gridSection, charMap) {
@@ -77,13 +74,12 @@ function drawGridSection(gridSection, charMap) {
 
 function drawEntireMap(grid, player, charMap) {
 
-    
+
     const startX = g.VIEWPORT_WIDTH / 2 - g.GRID_SIZE;
     const startY = 30;
     mapViewContext.fillStyle = '#222'
     mapViewContext.fillRect(startX, startY, g.GRID_SIZE * 2, g.GRID_SIZE * 2);
-    mapViewContext.strokeStyle = "silver";
-    mapViewContext.strokeRect(startX - 1, startY - 1, (g.GRID_SIZE * 2 + 2), (g.GRID_SIZE * 2) + 2);
+
 
     mapViewContext.fillStyle = "gray";
     for (let x = 0; x < g.GRID_SIZE; x++) {

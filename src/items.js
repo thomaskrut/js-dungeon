@@ -1,6 +1,6 @@
 export { generateItemsArray, removeItem };
 import { getRandom, getEmptyPoint } from "./util.js";
-import { itemTemplates } from "./templates.js";
+import { getItemTemplates } from "./templates.js";
 import { messages } from "./messages.js";
 
 function generateItem(template, grid, charMap, player, items) {
@@ -26,7 +26,7 @@ function removeItem(item, grid, charMap, items) {
 }
 
 function generateItemsArray(grid, charMap, player) {
-
+    const templates = getItemTemplates();
     let newItems = [];
 
     const numberOfItems = 10 + getRandom(20);
@@ -34,8 +34,8 @@ function generateItemsArray(grid, charMap, player) {
     for (let i = 0; i < numberOfItems; i++) {
 
         let r = getRandom(1000);
-
-        itemTemplates.forEach(i => {
+        console.log(getItemTemplates());
+        templates.forEach(i => {
             if (i.prob >= r) {
                 newItems.push(generateItem(i, grid, charMap, player, newItems));
             }

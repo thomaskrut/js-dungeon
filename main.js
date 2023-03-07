@@ -7,28 +7,29 @@ import { globals as g } from "./src/globals.js";
 import { getRandom, checkOverlap } from "./src/util.js";
 import { generateItemsArray } from "./src/items.js";
 import { generateMonstersArray } from "./src/monsters.js";
+import { loadTemplates } from "./src/templates.js";
 
-let gameState = 'MAZE';
+let gameState = 'INTRO';
 
 let litAreaSize = 5;
 
 const grid = initGrid(charMap);
 
-generateMap(grid, charMap);
-
-player.setPosition(getEmptyPoint(grid, charMap));
-
-const items = generateItemsArray(grid, charMap, player);
-
-const monsters = generateMonstersArray(grid, charMap);
-
-initKeyListener();
-
-updateMapView(player, grid);
-
-messages.addMessage("Welcome!");
+let items = [];
+let monsters = [];
+loadTemplates('src/templates.json');
+messages.addMessage("Welcome to the dungeon! Press n for new game");
 messages.updateRecent();
 drawMessages(player, messages);
+initKeyListener();
+
+function startGame() {
+    generateMap(grid, charMap);
+    player.setPosition(getEmptyPoint(grid, charMap));
+    items = generateItemsArray(grid, charMap, player);
+    monsters = generateMonstersArray(grid, charMap);
+    updateMapView(player, grid);
+}
 
 function moveMonsters(monsters, player, grid) {
 
@@ -80,8 +81,6 @@ function moveMonsters(monsters, player, grid) {
 
 function playerCommand(command) {
 
-
-
     if (command.length <= 2) {
         let modX = 0;
         let modY = 0;
@@ -91,7 +90,7 @@ function playerCommand(command) {
         if (command.includes('W')) modX = -1;
 
         if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
-            
+
             monsters.forEach(m => {
                 if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
                     messages.addMessage("You hit the " + m.name)
@@ -127,8 +126,6 @@ function playerCommand(command) {
     drawMessages(player, messages);
 
 }
-
-
 
 function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
@@ -203,64 +200,89 @@ function initKeyListener() {
 
     window.addEventListener("keydown", event => {
 
-        switch (event.key) {
+        switch (gameState) {
 
-            case "m":
-            case "M":
-                drawEntireMap(grid, player, charMap);
-                break;
+            case "INTRO": {
+                switch (event.key) {
 
-            case "i":
-            case "I":
-                switch (gameState) {
-                    case 'MAZE': {
-                        drawInventory(items, player);
-                        gameState = 'INVENTORY';
+                    case "n": {
+                        gameState = 'MAZE';
+                        startGame();
                         break;
                     }
-                    case 'INVENTORY': {
+
+                    default:
+                        console.log(event.key);
+                        return;
+                }
+                break;
+            }
+
+            case "INVENTORY": {
+                switch (event.key) {
+                    case "i": {
                         updateMapView(player, grid);
                         gameState = 'MAZE';
                         break;
                     }
                 }
                 break;
+            }
 
-            case "5":
-                playerCommand('rest');
-                break;
-            case "ArrowDown":
-            case "2":
-                playerCommand('S');
-                break;
-            case "ArrowUp":
-            case "8":
-                playerCommand('N');
-                break;
-            case "ArrowLeft":
-            case "4":
-                playerCommand('W');
-                break;
-            case "ArrowRight":
-            case "6":
-                playerCommand('E');
-                break;
-            case "7":
-                playerCommand('NW');
-                break;
-            case "9":
-                playerCommand('NE');
-                break;
-            case "1":
-                playerCommand('SW');
-                break;
-            case "3":
-                playerCommand('SE');
-                break;
-            default:
-                console.log(event.key);
-                return;
+            case "MAZE": {
+                switch (event.key) {
+
+                    case "m":
+                    case "M":
+                        drawEntireMap(grid, player, charMap);
+                        break;
+
+                    case "i":
+                    case "I":
+                        drawInventory(items, player);
+                        gameState = 'INVENTORY';
+                        break;
+
+                    case "5":
+                        playerCommand('rest');
+                        break;
+                    case "ArrowDown":
+                    case "2":
+                        playerCommand('S');
+                        break;
+                    case "ArrowUp":
+                    case "8":
+                        playerCommand('N');
+                        break;
+                    case "ArrowLeft":
+                    case "4":
+                        playerCommand('W');
+                        break;
+                    case "ArrowRight":
+                    case "6":
+                        playerCommand('E');
+                        break;
+                    case "7":
+                        playerCommand('NW');
+                        break;
+                    case "9":
+                        playerCommand('NE');
+                        break;
+                    case "1":
+                        playerCommand('SW');
+                        break;
+                    case "3":
+                        playerCommand('SE');
+                        break;
+                    default:
+                        console.log(event.key);
+                        return;
+                }
+            }
+
         }
+
+
         console.log(event.key);
 
         event.preventDefault();

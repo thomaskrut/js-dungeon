@@ -1,7 +1,7 @@
 body {
     padding-top: 40px;
     margin: auto;
-    
+    width: 800px;
     background-color: #161616;
     
 }
@@ -14,5 +14,11 @@ div.centered {
 canvas {
     padding: 2px;
     display: inline;
-    
+}
+
+p {
+    text-align:left;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11pt;
+    color: #888888;
 }

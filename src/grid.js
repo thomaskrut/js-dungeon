@@ -5,6 +5,18 @@ import { checkOverlap } from "./util.js";
 
 let litAreaSize = 5;
 
+/*
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 0, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 0, 1, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 0, -1, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 1, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, 1, -1, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 1, 1, charMap);
+    createLitArea(gridSection, { x: playerX, y: playerY }, -1, -1, 1, charMap);
+    */
+
+const modCycle = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: -1, y: -1 }];
+
 function createGridSection(elementsWide, elementsHigh, player, grid, charMap, items) {
 
     let startX = (player.x > elementsWide / 2) ? player.x - elementsWide / 2 : 0;
@@ -36,14 +48,10 @@ function createGridSection(elementsWide, elementsHigh, player, grid, charMap, it
         lit: true
     }
 
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 0, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 0, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, -1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, -1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, -1, 1, charMap);
+    for (var c of modCycle) {
+        createLitArea(gridSection, { x: playerX, y: playerY }, c.x, c.y, 1, charMap);
+    }
+
 
     return gridSection;
 }
@@ -57,14 +65,11 @@ function createLitArea(gridSection, startingPoint, modX, modY, step, charMap) {
     gridSection[x][y].visited = true;
 
     if (gridSection[x][y].char != charMap.get('wall')) {
-        createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, 1, 1, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, 1, -1, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, -1, 1, step + 1, charMap);
-        createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1, charMap);
+
+        for (var c of modCycle) {
+            createLitArea(gridSection, { x: x, y: y }, c.x, c.y, step + 1, charMap);
+        }
+
     }
 
 }

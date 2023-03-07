@@ -19,6 +19,7 @@ const player = {
     eatFood: function (item, messages) {
         this.hunger -= item.value;
         messages.addMessage("You ate " + item.prefix + " " + item.name.toLowerCase());
+        player.inventory.splice(player.inventory.indexOf(item), 1);
     },
 
     addGold: function (item, messages) {

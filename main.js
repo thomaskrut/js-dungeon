@@ -288,12 +288,3 @@ function initKeyListener() {
         event.preventDefault();
     }, true);
 }
-
-
-
-
-
-
-
-
-

@@ -252,7 +252,7 @@ function initKeyListener() {
                         }
                         if (selectedMenuItem == 1) {
                             player.inventory.splice(player.inventory.indexOf(selectedItem), 1);
-                            messages.addMessage("You dropped an " + selectedItem.name.toLowerCase());
+                            messages.addMessage("You dropped " + selectedItem.prefix + " " + selectedItem.name.toLowerCase());
                             let pos = getEmptyPoint(grid, charMap);
                             selectedItem.x = player.x;
                             selectedItem.y = player.y;

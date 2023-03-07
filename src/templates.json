@@ -31,7 +31,7 @@
             "minValue": 1,
             "maxValue": 10,
             "pickupAction": "addToInventory",
-            "useAction": "throwItem",
+            "useAction": "eatFood",
             "verb": "Eat"
         }
     ],

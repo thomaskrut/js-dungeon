@@ -1,11 +1,15 @@
 # jsrl
 
-An attempt to create a classic dungeon crawl / roguelike style game in JavaScript. Download files to play locally in browser.
+An attempt to create a classic dungeon crawl / roguelike style game in JavaScript.
+
+Play at https://thomaskrut.github.io/js-dungeon/
 
 To be implemented:
 
-[ ] monsters<br>
-[ ] items<br>
+[ ] more monsters<br>
+[ ] more items<br>
+[ ] permadeath<br>
+[ ] save game<br>
 [ ] more levels<br>
 [ ] player stats<br>
 [ ] inventory<br>

@@ -60,7 +60,7 @@ function moveMonsters(monsters, player, grid) {
                     }
 
                     if (checkOverlap(player, { x: m.x + modX, y: m.y + modY })) {
-                        messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack + " you!");
+                        messages.addMessage("The " + m.name.toLowerCase() + " " + m.attack[getRandom(m.attack.length)] + " you!");
                         player.hp -= m.str;
                         modX = 0;
                         modY = 0;
@@ -93,10 +93,10 @@ function playerCommand(command) {
 
             monsters.forEach(m => {
                 if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
-                    messages.addMessage("You hit the " + m.name)
+                    messages.addMessage("You hit the " + m.name.toLowerCase())
                     m.hp -= player.str;
                     if (m.hp <= 0) {
-                        messages.addMessage("You killed the " + m.name);
+                        messages.addMessage("You killed the " + m.name.toLowerCase());
                         grid[m.x][m.y].char = charMap.get('floor');
                         monsters.splice(monsters.indexOf(m), 1);
                     }

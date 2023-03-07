@@ -1,7 +1,7 @@
 export { getMonsterTemplates, getItemTemplates, loadTemplates };
 
-var itemTemplates = [];
-var monsterTemplates = [];
+let itemTemplates = [];
+let monsterTemplates = [];
 
 function getItemTemplates() {
         return itemTemplates;

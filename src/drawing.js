@@ -7,11 +7,6 @@ import { player } from "./player.js";
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
-/* const interval = setInterval(() => {
-    messages.addMessage(" ");
-    drawMessages(player, messages);
-}, 1500) */
-
 function drawInventory(items, player) {
     
     const startX = g.VIEWPORT_WIDTH / 2 - g.GRID_SIZE;

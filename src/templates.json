@@ -1,0 +1,60 @@
+{
+    "items": [
+        {
+            "name": "Gold",
+            "prefix": "pieces of",
+            "char": "$",
+            "prob": 100,
+            "value": 0,
+            "maxValue": 500,
+            "minValue": 5,
+            "pickupAction": "addGold"
+        },
+        {
+            "name": "Apple",
+            "prefix": "an",
+            "char": "õ",
+            "prob": 50,
+            "value": 10,
+            "minValue": 10,
+            "maxValue": 10,
+            "pickupAction": "addToInventory",
+            "useAction": "eatFood"
+        },
+        {
+            "name": "Fudge",
+            "prefix": "a",
+            "char": "¤",
+            "prob": 100,
+            "value": 10,
+            "minValue": 1,
+            "maxValue": 10,
+            "pickupAction": "addToInventory",
+            "useAction": "throwItem"
+        }
+    ],
+    "monsters": [
+        {
+            "name": "Small rat",
+            "char": "r",
+            "prob": 150,
+            "attack": ["bites", "scratches"],
+            "str": 3,
+            "hp": 10,
+            "moves": true,
+            "aggressive": false,
+            "speed": 10
+        },
+        {
+            "name": "Slow moving fungus",
+            "char": "F",
+            "prob": 100,
+            "attack": ["clutches at", "breathes at", "touches"],
+            "str": 2,
+            "hp": 40,
+            "moves": true,
+            "aggressive": true,
+            "speed": 60
+        }
+    ]
+}

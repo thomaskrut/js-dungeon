@@ -5,7 +5,7 @@ import { charMap } from "./src/charmap.js";
 import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
 import { globals as g } from "./src/globals.js";
 import { getRandom, checkOverlap } from "./src/util.js";
-import { generateItemsArray } from "./src/items.js";
+import { generateItemsArray, dropItem } from "./src/items.js";
 import { generateMonstersArray } from "./src/monsters.js";
 import { loadTemplates } from "./src/templates.js";
 
@@ -251,12 +251,7 @@ function initKeyListener() {
                             selectedItem.use();
                         }
                         if (selectedMenuItem == 1) {
-                            player.inventory.splice(player.inventory.indexOf(selectedItem), 1);
-                            messages.addMessage("You dropped " + selectedItem.prefix + " " + selectedItem.name.toLowerCase());
-                            let pos = getEmptyPoint(grid, charMap);
-                            selectedItem.x = player.x;
-                            selectedItem.y = player.y;
-                            items.push(selectedItem);
+                            dropItem(selectedItem, player, messages, items);
                         }
                         if (selectedMenuItem == 3) {
 

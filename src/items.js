@@ -1,4 +1,4 @@
-export { generateItemsArray, removeItem };
+export { generateItemsArray, removeItem, dropItem };
 import { getRandom, getEmptyPoint } from "./util.js";
 import { getItemTemplates } from "./templates.js";
 import { messages } from "./messages.js";
@@ -20,6 +20,14 @@ function generateItem(template, grid, charMap, player, items) {
     }
     return newItem;
 
+}
+
+function dropItem(selectedItem, player, messages, items) {
+    player.inventory.splice(player.inventory.indexOf(selectedItem), 1);
+    messages.addMessage("You dropped " + selectedItem.prefix + " " + selectedItem.name.toLowerCase());
+    selectedItem.x = player.x;
+    selectedItem.y = player.y;
+    items.push(selectedItem);
 }
 
 function removeItem(item, grid, charMap, items) {

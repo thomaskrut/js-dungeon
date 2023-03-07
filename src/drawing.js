@@ -1,13 +1,12 @@
 export { drawGridSection, drawMessages, drawMenu, drawEntireMap };
 
 import { globals as g } from "./globals.js";
-import { messages } from "./messages.js";
-import { player } from "./player.js";
+
 
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
-function drawMenu(menu, selectedMenuItem) {
+function drawMenu(currentMenu) {
 
     const startX = 30;
     const startY = 30;
@@ -18,10 +17,10 @@ function drawMenu(menu, selectedMenuItem) {
     mapViewContext.strokeStyle = "silver";
    
     mapViewContext.fillStyle = '#CCC'
-    mapViewContext.fillText(menu.title, startX + LEFT_MARGIN, startY + 30);
+    mapViewContext.fillText(currentMenu.title, startX + LEFT_MARGIN, startY + 30);
 
-    menu.menuItems.forEach((i, index) => {
-        if (index == selectedMenuItem) mapViewContext.fillText("> " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
+    currentMenu.menuItems.forEach((i, index) => {
+        if (index == currentMenu.selectedMenuItem) mapViewContext.fillText("> " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
         else mapViewContext.fillText("  " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
 
     });

@@ -8,15 +8,10 @@ import { getRandom, checkOverlap } from "./src/util.js";
 import { generateItemsArray, dropItem } from "./src/items.js";
 import { generateMonstersArray } from "./src/monsters.js";
 import { loadTemplates } from "./src/templates.js";
+import { createGridSection } from "./src/grid.js";
+import { menus } from "./src/menus.js";
 
 let gameState = 'INTRO';
-
-let selectedMenuItem = 0;
-let selectedItem;
-let numberOfMenuItems = 0;
-let currentMenu;
-
-let litAreaSize = 5;
 
 const grid = initGrid(charMap);
 
@@ -132,79 +127,9 @@ function playerCommand(command) {
 
 }
 
-function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
-
-    let startX = (centerObject.x > elementsWide / 2) ? centerObject.x - elementsWide / 2 : 0;
-    let startY = (centerObject.y > elementsHigh / 2) ? centerObject.y - elementsHigh / 2 : 0;
-
-    if (startX > g.GRID_SIZE - elementsWide) startX = g.GRID_SIZE - elementsWide;
-    if (startY > g.GRID_SIZE - elementsHigh) startY = g.GRID_SIZE - elementsHigh;
-
-    const playerX = centerObject.x - startX;
-    const playerY = centerObject.y - startY;
-
-    let gridSection = [];
-
-    for (var x = 0; x < elementsWide; x++) {
-        gridSection[x] = [];
-        for (var y = 0; y < elementsHigh; y++) {
-            gridSection[x][y] = grid[startX + x][startY + y];
-            gridSection[x][y].lit = false;
-            items.forEach(i => {
-                if (checkOverlap(i, { x: startX + x, y: startY + y })) gridSection[x][y].char = i.char;
-            });
-
-
-        }
-    }
-
-    gridSection[playerX][playerY] = {
-        char: charMap.get('player'),
-        lit: true
-    }
-
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 0, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 0, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, 1, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, -1, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 1, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, -1, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 1, 1);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, -1, 1);
-
-    return gridSection;
-}
-
 function updateMapView() {
-    drawGridSection(createGridSection(g.VIEWPORT_WIDTH / g.ELEMENT_SIZE, g.VIEWPORT_HEIGHT / g.ELEMENT_SIZE, player, grid), charMap);
+    drawGridSection(createGridSection(g.VIEWPORT_WIDTH / g.ELEMENT_SIZE, g.VIEWPORT_HEIGHT / g.ELEMENT_SIZE, player, grid, charMap, items), charMap);
 
-}
-
-function createLitArea(gridSection, startingPoint, modX, modY, step) {
-    let x = startingPoint.x + modX;
-    let y = startingPoint.y + modY;
-    if (gridSection[x][y].lit) return;
-    if (step == litAreaSize) return;
-    gridSection[x][y].lit = true;
-    gridSection[x][y].visited = true;
-
-    if (gridSection[x][y].char != charMap.get('wall')) {
-        createLitArea(gridSection, { x: x, y: y }, 1, 0, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, -1, 0, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, 0, 1, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, 0, -1, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, 1, 1, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, 1, -1, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, -1, 1, step + 1);
-        createLitArea(gridSection, { x: x, y: y }, -1, -1, step + 1);
-    }
-
-}
-
-function createMenu(menuItems, title) {
-    selectedMenuItem = 0;
-    numberOfMenuItems = menuItems.length;
-    return { menuItems: menuItems, title: title };
 }
 
 function initKeyListener() {
@@ -234,31 +159,31 @@ function initKeyListener() {
                 switch (event.key) {
                     case "2":
                     case "ArrowDown": {
-                        if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.moveDown();
+                        drawMenu(menus.getCurrentMenu());
                         break;
                     }
                     case "8":
                     case "ArrowUp": {
-                        if (selectedMenuItem > 0) selectedMenuItem--;
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.moveUp();
+                        drawMenu(menus.getCurrentMenu());
                         break;
                     }
                     case "5":
                     case "Enter": {
 
-                        if (selectedMenuItem == 0) {
-                            selectedItem.use();
+                        if (menus.selectedMenuItem == 0) {
+                            menus.selectedItem.use();
                         }
-                        if (selectedMenuItem == 1) {
-                            dropItem(selectedItem, player, messages, items);
+                        if (menus.selectedMenuItem == 1) {
+                            dropItem(menus.selectedItem, player, messages, items);
                         }
-                        if (selectedMenuItem == 3) {
+                        if (menus.selectedMenuItem == 3) {
 
                         }
                         drawMessages(player, messages);
-                        currentMenu = createMenu(player.inventory, 'INVENTORY');
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.createMenu(player.inventory, 'INVENTORY');
+                        drawMenu(menus.getCurrentMenu());
                         gameState = 'INVENTORY';
                         break;
                     }
@@ -278,21 +203,21 @@ function initKeyListener() {
                 switch (event.key) {
                     case "2":
                     case "ArrowDown": {
-                        if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.moveDown();
+                        drawMenu(menus.getCurrentMenu());
                         break;
                     }
                     case "8":
                     case "ArrowUp": {
-                        if (selectedMenuItem > 0) selectedMenuItem--;
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.moveUp();
+                        drawMenu(menus.getCurrentMenu());
                         break;
                     }
                     case "5":
                     case "Enter": {
-                        selectedItem = player.inventory[selectedMenuItem];
-                        currentMenu = createMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], "What to do with this " + selectedItem.name.toLowerCase() + "?");
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.selectedItem = player.inventory[menus.selectedMenuItem];
+                        menus.createMenu([{ name: menus.selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], "What to do with this " + menus.selectedItem.name.toLowerCase() + "?");
+                        drawMenu(menus.getCurrentMenu());
                         gameState = 'ITEM';
                         break;
                     }
@@ -318,8 +243,8 @@ function initKeyListener() {
 
                     case "i":
                     case "I":
-                        currentMenu = createMenu(player.inventory, 'INVENTORY');
-                        drawMenu(currentMenu, selectedMenuItem);
+                        menus.createMenu(player.inventory, 'INVENTORY');
+                        drawMenu(menus.getCurrentMenu());
                         gameState = 'INVENTORY';
                         break;
 

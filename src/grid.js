@@ -5,16 +5,6 @@ import { checkOverlap } from "./util.js";
 
 let litAreaSize = 5;
 
-/*
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 0, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 0, -1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, 1, -1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, 1, 1, charMap);
-    createLitArea(gridSection, { x: playerX, y: playerY }, -1, -1, 1, charMap);
-    */
-
 const modCycle = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: -1, y: -1 }];
 
 function createGridSection(elementsWide, elementsHigh, player, grid, charMap, items) {

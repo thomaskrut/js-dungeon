@@ -27,6 +27,10 @@ const player = {
         messages.addMessage("You found " + item.value + " gold!");
     },
 
+    lightTorch: function (item, messages) {
+
+    },
+
     addToInventory: function (item, messages) {
         this.inventory.push(item);
         console.log(this.inventory);

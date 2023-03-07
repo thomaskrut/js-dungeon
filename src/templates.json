@@ -33,6 +33,18 @@
             "pickupAction": "addToInventory",
             "useAction": "eatFood",
             "verb": "Eat"
+        },
+        {
+            "name": "Torch",
+            "prefix": "a",
+            "char": "/",
+            "prob": 100,
+            "value": 2000,
+            "minValue": 2000,
+            "maxValue": 2000,
+            "pickupAction": "addToInventory",
+            "useAction": "lightTorch",
+            "verb": "Light"
         }
     ],
     "monsters": [

@@ -15,6 +15,9 @@ function generateItem(template, grid, charMap, player, items) {
         player[template.pickupAction]?.call(player, newItem, messages);
         removeItem(newItem, grid, charMap, items);
     }
+    newItem.use = function () {
+        player[template.useAction]?.call(player, newItem, messages)
+    }
     return newItem;
 
 }

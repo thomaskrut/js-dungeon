@@ -14,23 +14,25 @@
             "name": "Apple",
             "prefix": "an",
             "char": "õ",
-            "prob": 50,
+            "prob": 550,
             "value": 10,
             "minValue": 10,
             "maxValue": 10,
             "pickupAction": "addToInventory",
-            "useAction": "eatFood"
+            "useAction": "eatFood",
+            "verb": "Eat"
         },
         {
             "name": "Fudge",
             "prefix": "a",
             "char": "¤",
-            "prob": 100,
+            "prob": 500,
             "value": 10,
             "minValue": 1,
             "maxValue": 10,
             "pickupAction": "addToInventory",
-            "useAction": "throwItem"
+            "useAction": "throwItem",
+            "verb": "Eat"
         }
     ],
     "monsters": [

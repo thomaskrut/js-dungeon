@@ -1,4 +1,4 @@
-export {drawGridSection, drawMessages, drawInventory, drawEntireMap};
+export {drawGridSection, drawMessages, drawMenu, drawEntireMap};
 
 import { globals as g } from "./globals.js";
 import { messages } from "./messages.js";
@@ -7,7 +7,7 @@ import { player } from "./player.js";
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
-function drawInventory(items, player) {
+function drawMenu(menuItems, selectedItem, title) {
     
     const startX = g.VIEWPORT_WIDTH / 2 - g.GRID_SIZE;
     const startY = 30;
@@ -17,18 +17,20 @@ function drawInventory(items, player) {
     mapViewContext.strokeStyle = "silver";
     mapViewContext.strokeRect(startX - 1, startY - 1, (g.GRID_SIZE * 2 + 2), (g.GRID_SIZE * 2) + 2);
     mapViewContext.fillStyle = '#CCC'
-    mapViewContext.fillText("Inventory", startX + 160, startY + 30);
+    mapViewContext.fillText(title, startX + 160, startY + 30);
 
 
 
-    player.inventory.forEach((i, index) => {
-
-        mapViewContext.fillText(i.name, startX, 100 + (startY * index));
+    menuItems.forEach((i, index) => {
+        if (index == selectedItem) mapViewContext.fillText(">" + index + ": " + i.name, startX, 100 + (startY * index));
+        else mapViewContext.fillText(" " + index + ": " + i.name, startX, 100 + (startY * index));
 
     });
 
 
 }
+
+
 
 function drawMessages(player, messages) {
 

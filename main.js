@@ -1,5 +1,5 @@
 import { player } from "./src/player.js";
-import { drawEntireMap, drawGridSection, drawInventory, drawMessages } from "./src/drawing.js";
+import { drawEntireMap, drawGridSection, drawMenu, drawMessages } from "./src/drawing.js";
 import { messages } from "./src/messages.js";
 import { charMap } from "./src/charmap.js";
 import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
@@ -10,6 +10,10 @@ import { generateMonstersArray } from "./src/monsters.js";
 import { loadTemplates } from "./src/templates.js";
 
 let gameState = 'INTRO';
+
+let selectedMenuItem = 0;
+let selectedItem;
+let numberOfMenuItems = 0;
 
 let litAreaSize = 5;
 
@@ -218,13 +222,86 @@ function initKeyListener() {
                 break;
             }
 
-            case "INVENTORY": {
+            case "ITEM": {
+
                 switch (event.key) {
+                    case "2":
+                    case "ArrowDown": {
+                        if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
+                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], selectedMenuItem, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        break;
+                    }
+                    case "8":
+                    case "ArrowUp": {
+                        if (selectedMenuItem > 0) selectedMenuItem--;
+                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], selectedMenuItem, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        break;
+                    }
+                    case "5":
+                    case "Enter": {
+
+                        if (selectedMenuItem == 0) {
+                            selectedItem.use();
+                        }
+                        if (selectedMenuItem == 1) {
+                            player.inventory.splice(player.inventory.indexOf(selectedItem), 1);
+                           // add item to map
+                            messages.addMessage("You dropped an " + selectedItem.name.toLowerCase());
+                        }
+                        if (selectedMenuItem == 3) {
+
+                        }
+                        drawMessages(player, messages);
+                        selectedMenuItem = 0;
+                        numberOfMenuItems = player.inventory.length;
+                        
+                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        gameState = 'INVENTORY';
+                        break;
+                    }
                     case "i": {
                         updateMapView(player, grid);
                         gameState = 'MAZE';
                         break;
                     }
+                    default:
+                        console.log(event.key);
+                        return;
+                }
+                break;
+            }
+
+            case "INVENTORY": {
+                switch (event.key) {
+                    case "2":
+                    case "ArrowDown": {
+                        if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
+                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        break;
+                    }
+                    case "8":
+                    case "ArrowUp": {
+                        if (selectedMenuItem > 0) selectedMenuItem--;
+                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        break;
+                    }
+                    case "5":
+                    case "Enter": {      
+                        selectedItem = player.inventory[selectedMenuItem];
+                        selectedMenuItem = 0;
+                        numberOfMenuItems = 3;
+                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], 0, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        gameState = 'ITEM';
+                        break;
+                    }
+                    case "i": {
+                        updateMapView(player, grid);
+                        gameState = 'MAZE';
+                        break;
+                    }
+                    default:
+                        console.log(event.key);
+                        return;
                 }
                 break;
             }
@@ -239,7 +316,9 @@ function initKeyListener() {
 
                     case "i":
                     case "I":
-                        drawInventory(items, player);
+                        selectedMenuItem = 0;
+                        numberOfMenuItems = player.inventory.length;
+                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
                         gameState = 'INVENTORY';
                         break;
 

@@ -16,8 +16,9 @@ const player = {
         this.y = pos.y;
     },
 
-    earFood: function (item, messages) {
+    eatFood: function (item, messages) {
         this.hunger -= item.value;
+        messages.addMessage("You ate " + item.prefix + " " + item.name.toLowerCase());
     },
 
     addGold: function (item, messages) {

@@ -1,5 +1,4 @@
 import { player } from "./src/player.js";
-import { monsterTemplates, itemTemplates } from "./src/templates.js";
 import { drawEntireMap, drawGridSection, drawInventory, drawMessages } from "./src/drawing.js";
 import { messages } from "./src/messages.js";
 import { charMap } from "./src/charmap.js";
@@ -7,6 +6,7 @@ import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
 import { globals as g } from "./src/globals.js";
 import { getRandom, checkOverlap } from "./src/util.js";
 import { generateItemsArray } from "./src/items.js";
+import { generateMonstersArray } from "./src/monsters.js";
 
 let gameState = 'MAZE';
 
@@ -20,7 +20,7 @@ player.setPosition(getEmptyPoint(grid, charMap));
 
 const items = generateItemsArray(grid, charMap, player);
 
-const monsters = generateMonstersArray();
+const monsters = generateMonstersArray(grid, charMap);
 
 initKeyListener();
 
@@ -29,39 +29,6 @@ updateMapView(player, grid);
 messages.addMessage("Welcome!");
 messages.updateRecent();
 drawMessages(player, messages);
-
-
-
-
-function generateMonster(template) {
-    let newMonster = Object.assign({}, template);
-    let point = getEmptyPoint(grid, charMap);
-    newMonster.x = point.x;
-    newMonster.y = point.y;
-    newMonster.hp = template.hp + getRandom(5);
-    newMonster.moveCounter = getRandom(template.speed);
-    return newMonster;
-}
-
-function generateMonstersArray() {
-    let newMonsters = [];
-    const numberOfMonsters = 10 + getRandom(20);
-    for (let i = 0; i < numberOfMonsters; i++) {
-
-        let r = getRandom(1000);
-
-        monsterTemplates.forEach(m => {
-            if (m.prob >= r) {
-                newMonsters.push(generateMonster(m));
-            }
-        })
-
-
-    }
-
-    return newMonsters;
-
-}
 
 function moveMonsters(monsters, player, grid) {
 
@@ -113,65 +80,55 @@ function moveMonsters(monsters, player, grid) {
 
 function playerCommand(command) {
 
-    switch (gameState) {
 
-        case 'MAZE': {
 
-            if (command.length <= 2) {
-                let modX = 0;
-                let modY = 0;
-                if (command.includes('N')) modY = -1;
-                if (command.includes('S')) modY = 1;
-                if (command.includes('E')) modX = 1;
-                if (command.includes('W')) modX = -1;
+    if (command.length <= 2) {
+        let modX = 0;
+        let modY = 0;
+        if (command.includes('N')) modY = -1;
+        if (command.includes('S')) modY = 1;
+        if (command.includes('E')) modX = 1;
+        if (command.includes('W')) modX = -1;
 
-                if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
-                    monsters.forEach(m => {
-                        if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
-                            messages.addMessage("You hit the " + m.name)
-                            m.hp -= player.str;
-                            if (m.hp <= 0) {
-                                messages.addMessage("You killed the " + m.name);
-                                grid[m.x][m.y].char = charMap.get('floor');
-                                monsters.splice(monsters.indexOf(m), 1);
-                            }
-                            modX = 0;
-                            modY = 0;
-                        }
-                    });
-                    player.x += modX;
-                    player.y += modY;
-                    moveMonsters(monsters, player, grid);
-                    updateMapView(player, grid);
-                }
-
-                items.forEach(i => {
-                    if (checkOverlap(i, player)) {
-                        i.pickUp();
+        if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
+            
+            monsters.forEach(m => {
+                if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
+                    messages.addMessage("You hit the " + m.name)
+                    m.hp -= player.str;
+                    if (m.hp <= 0) {
+                        messages.addMessage("You killed the " + m.name);
+                        grid[m.x][m.y].char = charMap.get('floor');
+                        monsters.splice(monsters.indexOf(m), 1);
                     }
-                })
-
-            }
-
-            if (command == 'rest') {
-                moveMonsters(monsters, player, grid);
-                updateMapView(player, grid);
-            }
-
-            drawMessages(player, messages);
-            break;
+                    modX = 0;
+                    modY = 0;
+                }
+            });
+            player.x += modX;
+            player.y += modY;
+            moveMonsters(monsters, player, grid);
+            updateMapView(player, grid);
         }
 
-        case 'INVENTORY': {
-            if (command == 'inventory') {
-                updateMapView(player, grid);
-                gameState = 'MAZE';
+        items.forEach(i => {
+            if (checkOverlap(i, player)) {
+                i.pickUp();
             }
-            break;
-        }
+        })
+
     }
 
+    if (command == 'rest') {
+        moveMonsters(monsters, player, grid);
+        updateMapView(player, grid);
+    }
+
+    drawMessages(player, messages);
+
 }
+
+
 
 function createGridSection(elementsWide, elementsHigh, centerObject, grid) {
 
@@ -247,10 +204,12 @@ function initKeyListener() {
     window.addEventListener("keydown", event => {
 
         switch (event.key) {
+
             case "m":
             case "M":
                 drawEntireMap(grid, player, charMap);
                 break;
+
             case "i":
             case "I":
                 switch (gameState) {
@@ -265,6 +224,7 @@ function initKeyListener() {
                         break;
                     }
                 }
+                break;
 
             case "5":
                 playerCommand('rest');

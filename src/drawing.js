@@ -7,7 +7,7 @@ import { player } from "./player.js";
 const mapViewContext = document.getElementById('mapView').getContext("2d");
 const messagesContext = document.getElementById('messages').getContext("2d");
 
-function drawMenu(menuItems, selectedItem, title) {
+function drawMenu(menu, selectedMenuItem) {
 
     const startX = 30;
     const startY = 30;
@@ -18,10 +18,10 @@ function drawMenu(menuItems, selectedItem, title) {
     mapViewContext.strokeStyle = "silver";
    
     mapViewContext.fillStyle = '#CCC'
-    mapViewContext.fillText(title, startX + LEFT_MARGIN, startY + 30);
+    mapViewContext.fillText(menu.title, startX + LEFT_MARGIN, startY + 30);
 
-    menuItems.forEach((i, index) => {
-        if (index == selectedItem) mapViewContext.fillText("> " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
+    menu.menuItems.forEach((i, index) => {
+        if (index == selectedMenuItem) mapViewContext.fillText("> " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
         else mapViewContext.fillText("  " + i.name, startX + LEFT_MARGIN, 100 + (startY * index));
 
     });

@@ -201,6 +201,12 @@ function createLitArea(gridSection, startingPoint, modX, modY, step) {
 
 }
 
+function createMenu(menuItems, title) {
+    selectedMenuItem = 0;
+    numberOfMenuItems = menuItems.length;
+    return { menuItems: menuItems, title: title };
+}
+
 function initKeyListener() {
 
     window.addEventListener("keydown", event => {
@@ -229,13 +235,13 @@ function initKeyListener() {
                     case "2":
                     case "ArrowDown": {
                         if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
-                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], selectedMenuItem, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        drawMenu(currentMenu, selectedMenuItem);
                         break;
                     }
                     case "8":
                     case "ArrowUp": {
                         if (selectedMenuItem > 0) selectedMenuItem--;
-                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], selectedMenuItem, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        drawMenu(currentMenu, selectedMenuItem);
                         break;
                     }
                     case "5":
@@ -256,10 +262,8 @@ function initKeyListener() {
 
                         }
                         drawMessages(player, messages);
-                        selectedMenuItem = 0;
-                        numberOfMenuItems = player.inventory.length;
-                        
-                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        currentMenu = createMenu(player.inventory, 'INVENTORY');
+                        drawMenu(currentMenu, selectedMenuItem);
                         gameState = 'INVENTORY';
                         break;
                     }
@@ -280,21 +284,20 @@ function initKeyListener() {
                     case "2":
                     case "ArrowDown": {
                         if (selectedMenuItem < numberOfMenuItems - 1) selectedMenuItem++;
-                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        drawMenu(currentMenu, selectedMenuItem);
                         break;
                     }
                     case "8":
                     case "ArrowUp": {
                         if (selectedMenuItem > 0) selectedMenuItem--;
-                        drawMenu(player.inventory, selectedMenuItem, 'Inventory');
+                        drawMenu(currentMenu, selectedMenuItem);
                         break;
                     }
                     case "5":
-                    case "Enter": {      
+                    case "Enter": {
                         selectedItem = player.inventory[selectedMenuItem];
-                        selectedMenuItem = 0;
-                        numberOfMenuItems = 3;
-                        drawMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], 0, "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        currentMenu = createMenu([{ name: selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], "What to do with this " + selectedItem.name.toLowerCase() + "?");
+                        drawMenu(currentMenu, selectedMenuItem);
                         gameState = 'ITEM';
                         break;
                     }
@@ -320,9 +323,8 @@ function initKeyListener() {
 
                     case "i":
                     case "I":
-                        selectedMenuItem = 0;
-                        numberOfMenuItems = player.inventory.length;
-                        drawMenu(player.inventory, selectedMenuItem, 'INVENTORY');
+                        currentMenu = createMenu(player.inventory, 'INVENTORY');
+                        drawMenu(currentMenu, selectedMenuItem);
                         gameState = 'INVENTORY';
                         break;
 

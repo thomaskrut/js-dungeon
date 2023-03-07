@@ -1,4 +1,4 @@
-export { generateMonstersArray };
+export { generateMonstersArray, removeMonster };
 import { getRandom, getEmptyPoint } from "./util.js";
 import { getMonsterTemplates } from "./templates.js";
 
@@ -32,4 +32,8 @@ function generateMonstersArray(grid, charMap) {
 
     return newMonsters;
 
+}
+
+function removeMonster(monsters, monster) {
+    monsters.splice(monsters.indexOf(monster), 1);
 }

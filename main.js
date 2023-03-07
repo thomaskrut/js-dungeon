@@ -6,7 +6,7 @@ import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
 import { globals as g } from "./src/globals.js";
 import { getRandom, checkOverlap } from "./src/util.js";
 import { generateItemsArray, dropItem } from "./src/items.js";
-import { generateMonstersArray } from "./src/monsters.js";
+import { generateMonstersArray, removeMonster } from "./src/monsters.js";
 import { loadTemplates } from "./src/templates.js";
 import { createGridSection } from "./src/grid.js";
 import { menus } from "./src/menus.js";
@@ -77,7 +77,7 @@ function moveMonsters(monsters, player, grid) {
 
         });
     }
-}
+}   
 
 function playerCommand(command) {
 
@@ -98,7 +98,7 @@ function playerCommand(command) {
                     if (m.hp <= 0) {
                         messages.addMessage("You killed the " + m.name.toLowerCase());
                         grid[m.x][m.y].char = charMap.get('floor');
-                        monsters.splice(monsters.indexOf(m), 1);
+                        removeMonster(monsters, m);
                     }
                     modX = 0;
                     modY = 0;
@@ -233,12 +233,23 @@ function initKeyListener() {
                 break;
             }
 
+            case "MAP": {
+                switch (event.key) {
+
+                    default:
+                        gameState = 'MAZE';
+                        updateMapView();
+                        return;
+                }
+            }
+
             case "MAZE": {
                 switch (event.key) {
 
                     case "m":
                     case "M":
                         drawEntireMap(grid, player, charMap);
+                        gameState = 'MAP';
                         break;
 
                     case "i":

@@ -15,22 +15,22 @@ function generateMonster(grid, charMap, template) {
 
 function generateMonstersArray(grid, charMap) {
     const templates = getMonsterTemplates();
-    let newMonsters = [];
+    let newMonstersArray = [];
     const numberOfMonsters = 10 + getRandom(20);
     for (let i = 0; i < numberOfMonsters; i++) {
 
-        let r = getRandom(1000);
+        let randomNumber = getRandom(1000);
         
-        templates.forEach(m => {
-            if (m.prob >= r) {
-                newMonsters.push(generateMonster(grid, charMap, m));
+        templates.forEach(monsterTemplate => {
+            if (monsterTemplate.prob >= randomNumber) {
+                newMonstersArray.push(generateMonster(grid, charMap, monsterTemplate));
             }
         })
 
 
     }
 
-    return newMonsters;
+    return newMonstersArray;
 
 }
 

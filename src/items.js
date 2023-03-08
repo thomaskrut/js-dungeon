@@ -44,11 +44,11 @@ function generateItemsArray(grid, charMap, player) {
 
     for (let i = 0; i < numberOfItems; i++) {
 
-        let r = getRandom(1000);
-        console.log(getItemTemplates());
-        templates.forEach(i => {
-            if (i.prob >= r) {
-                newItems.push(generateItem(i, grid, charMap, player, newItems));
+        const randomNumber = getRandom(1000);
+     
+        templates.forEach(itemTemplate => {
+            if (itemTemplate.prob >= randomNumber) {
+                newItems.push(generateItem(itemTemplate, grid, charMap, player, newItems));
             }
         })
 

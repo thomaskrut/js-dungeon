@@ -89,23 +89,22 @@ function playerCommand(command) {
         if (command.includes('E')) modX = 1;
         if (command.includes('W')) modX = -1;
 
-        if (grid[player.x + modX][player.y + modY].char != charMap.get('wall')) {
+        let nextPlayerPosition = {x: player.x + modX, y: player.y + modY};
 
-            monsters.forEach(m => {
-                if (checkOverlap({ x: player.x + modX, y: player.y + modY }, m)) {
-                    messages.addMessage("You hit the " + m.name.toLowerCase())
-                    m.hp -= player.str;
-                    if (m.hp <= 0) {
-                        messages.addMessage("You killed the " + m.name.toLowerCase());
-                        grid[m.x][m.y].char = charMap.get('floor');
-                        removeMonster(monsters, m);
+        if (grid[nextPlayerPosition.x][nextPlayerPosition.y].char != charMap.get('wall')) {
+
+            monsters.forEach(monster => {
+                if (checkOverlap(nextPlayerPosition, monster)) {
+                    messages.addMessage("You hit the " + monster.name.toLowerCase())
+                    monster.hp -= player.str;
+                    if (monster.hp <= 0) {
+                        messages.addMessage("You killed the " + monster.name.toLowerCase());
+                        removeMonster(monsters, monster, grid, charMap);
                     }
-                    modX = 0;
-                    modY = 0;
+                    nextPlayerPosition = {x: player.x, y: player.y};
                 }
             });
-            player.x += modX;
-            player.y += modY;
+            player.setPosition(nextPlayerPosition);
             moveMonsters(monsters, player, grid);
             updateMapView(player, grid);
         }

@@ -34,6 +34,7 @@ function generateMonstersArray(grid, charMap) {
 
 }
 
-function removeMonster(monsters, monster) {
+function removeMonster(monsters, monster, grid, charMap) {
+    grid[monster.x][monster.y].char = charMap.get('floor');
     monsters.splice(monsters.indexOf(monster), 1);
 }

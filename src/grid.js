@@ -38,9 +38,9 @@ function createGridSection(elementsWide, elementsHigh, player, grid, charMap, it
         lit: true
     }
 
-    for (var c of modCycle) {
+    modCycle.forEach(c => {
         createLitArea(gridSection, { x: playerX, y: playerY }, c.x, c.y, 1, charMap);
-    }
+    });
 
 
     return gridSection;
@@ -56,9 +56,9 @@ function createLitArea(gridSection, startingPoint, modX, modY, step, charMap) {
 
     if (gridSection[x][y].char != charMap.get('wall')) {
 
-        for (var c of modCycle) {
+        modCycle.forEach(c => {
             createLitArea(gridSection, { x: x, y: y }, c.x, c.y, step + 1, charMap);
-        }
+        });
 
     }
 

@@ -77,9 +77,23 @@ function moveMonsters(monsters, player, grid) {
 
         });
     }
-}   
+}
 
-function playerCommand(command) {
+function checkForItems(player, items) {
+    const itemsOnLocation = items.filter(i => checkOverlap(i, player));
+    
+    if (itemsOnLocation.length >= 1) {
+        itemsOnLocation.push({ prefix: "no thanks", name: " "});
+        menus.createMenu(itemsOnLocation.map(i => { return { name: i.prefix + " " + i.name.toLowerCase(), item: i } }), "Choose what to pick up:");
+        drawMenu(menus.getCurrentMenu());
+        gameState = 'ITEMS_PICKUP';
+    } else {
+        gameState = 'MAZE';
+        updateMapView(player, grid);
+    }
+}
+
+function movePlayer(command) {
 
     if (command.length <= 2) {
         let modX = 0;
@@ -89,7 +103,7 @@ function playerCommand(command) {
         if (command.includes('E')) modX = 1;
         if (command.includes('W')) modX = -1;
 
-        let nextPlayerPosition = {x: player.x + modX, y: player.y + modY};
+        let nextPlayerPosition = { x: player.x + modX, y: player.y + modY };
 
         if (grid[nextPlayerPosition.x][nextPlayerPosition.y].char != charMap.get('wall')) {
 
@@ -101,23 +115,22 @@ function playerCommand(command) {
                         messages.addMessage("You killed the " + monster.name.toLowerCase());
                         removeMonster(monsters, monster, grid, charMap);
                     }
-                    nextPlayerPosition = {x: player.x, y: player.y};
+                    nextPlayerPosition = { x: player.x, y: player.y };
                 }
             });
             player.setPosition(nextPlayerPosition);
+            player.turns++;
             moveMonsters(monsters, player, grid);
             updateMapView(player, grid);
+            checkForItems(player, items);
         }
 
-        items.forEach(i => {
-            if (checkOverlap(i, player)) {
-                i.pickUp();
-            }
-        })
+       
 
     }
 
     if (command == 'rest') {
+        player.turns++;
         moveMonsters(monsters, player, grid);
         updateMapView(player, grid);
     }
@@ -153,6 +166,49 @@ function initKeyListener() {
                 break;
             }
 
+            case "ITEMS_PICKUP": {
+
+                switch (event.key) {
+                    case "2":
+                    case "ArrowDown": {
+                        menus.moveDown();
+                        drawMenu(menus.getCurrentMenu());
+                        break;
+                    }
+                    case "8":
+                    case "ArrowUp": {
+                        menus.moveUp();
+                        drawMenu(menus.getCurrentMenu());
+                        break;
+                    }
+                    case "5":
+                    case "Enter": {
+
+                        if (menus.selectedMenuItem == menus.numberOfMenuItems - 1) {
+                            gameState = 'MAZE';
+                            updateMapView();
+                        } else {
+                            menus.getCurrentMenu().menuItems[menus.selectedMenuItem].item.pickUp();
+                            movePlayer('rest');
+                            checkForItems(player, items);
+                        }
+                        
+                        drawMessages(player, messages);
+                                   
+                        break;
+                    }
+                    case "i": {
+                        updateMapView(player, grid);
+                        gameState = 'MAZE';
+                        break;
+                    }
+                    default:
+                        console.log(event.key);
+                        return;
+                }
+                break;
+            }
+
             case "ITEM": {
 
                 switch (event.key) {
@@ -173,9 +229,11 @@ function initKeyListener() {
 
                         if (menus.selectedMenuItem == 0) {
                             menus.selectedItem.use();
+                            movePlayer('rest');
                         }
                         if (menus.selectedMenuItem == 1) {
                             player.dropItem(menus.selectedItem, messages, items);
+                            movePlayer('rest');
                         }
                         if (menus.selectedMenuItem == 3) {
 
@@ -215,7 +273,6 @@ function initKeyListener() {
                     case "5":
                     case "Enter": {
                         menus.selectedItem = player.getSelectedItem(menus.selectedMenuItem);
-                        console.log(menus.selectedItem.name);
                         menus.createMenu([{ name: menus.selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], "What to do with this " + menus.selectedItem.name.toLowerCase() + "?");
                         drawMenu(menus.getCurrentMenu());
                         gameState = 'ITEM';
@@ -260,35 +317,35 @@ function initKeyListener() {
                         break;
 
                     case "5":
-                        playerCommand('rest');
+                        movePlayer('rest');
                         break;
                     case "ArrowDown":
                     case "2":
-                        playerCommand('S');
+                        movePlayer('S');
                         break;
                     case "ArrowUp":
                     case "8":
-                        playerCommand('N');
+                        movePlayer('N');
                         break;
                     case "ArrowLeft":
                     case "4":
-                        playerCommand('W');
+                        movePlayer('W');
                         break;
                     case "ArrowRight":
                     case "6":
-                        playerCommand('E');
+                        movePlayer('E');
                         break;
                     case "7":
-                        playerCommand('NW');
+                        movePlayer('NW');
                         break;
                     case "9":
-                        playerCommand('NE');
+                        movePlayer('NE');
                         break;
                     case "1":
-                        playerCommand('SW');
+                        movePlayer('SW');
                         break;
                     case "3":
-                        playerCommand('SE');
+                        movePlayer('SE');
                         break;
                     default:
                         console.log(event.key);

@@ -8,6 +8,7 @@ const player = {
     hp: 30,
     str: 12,
     hunger: 0,
+    turns: 0,
 
     inventory: [],
 
@@ -53,7 +54,6 @@ const player = {
     },
 
     getSelectedItem: function (selectedMenuItem) {
-        console.log(this.getInventoryToDraw()[selectedMenuItem].item.item);
         return this.getInventoryToDraw()[selectedMenuItem].item.item;
     },
 

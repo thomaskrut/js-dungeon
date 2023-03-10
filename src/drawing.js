@@ -13,7 +13,7 @@ function drawMenu(currentMenu) {
     const LEFT_MARGIN = 10;
     mapViewContext.font = "14px courier new";
     mapViewContext.fillStyle = '#222'
-    mapViewContext.fillRect(startX, startY, g.VIEWPORT_WIDTH / 3, g.VIEWPORT_HEIGHT - 60);
+    mapViewContext.fillRect(startX, startY, g.VIEWPORT_WIDTH / 2, g.VIEWPORT_HEIGHT - 60);
     mapViewContext.strokeStyle = "silver";
    
     mapViewContext.fillStyle = '#CCC'
@@ -42,6 +42,7 @@ function drawMessages(player, messages) {
     messagesContext.fillStyle = "silver";
     messagesContext.fillText("X: " + player.x + " | Y: " + player.y, g.VIEWPORT_WIDTH - 160, 20)
     messagesContext.fillText("HP: " + player.hp, g.VIEWPORT_WIDTH - 160, 40)
+    messagesContext.fillText("Turns: " + player.turns, g.VIEWPORT_WIDTH - 160, 60)
 
 }
 

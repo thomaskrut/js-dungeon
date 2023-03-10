@@ -5,7 +5,7 @@ import { charMap } from "./src/charmap.js";
 import { generateMap, getEmptyPoint, initGrid } from "./src/mapgenerator.js";
 import { globals as g } from "./src/globals.js";
 import { getRandom, checkOverlap } from "./src/util.js";
-import { generateItemsArray, dropItem } from "./src/items.js";
+import { generateItemsArray } from "./src/items.js";
 import { generateMonstersArray, removeMonster } from "./src/monsters.js";
 import { loadTemplates } from "./src/templates.js";
 import { createGridSection } from "./src/grid.js";
@@ -175,13 +175,13 @@ function initKeyListener() {
                             menus.selectedItem.use();
                         }
                         if (menus.selectedMenuItem == 1) {
-                            dropItem(menus.selectedItem, player, messages, items);
+                            player.dropItem(menus.selectedItem, messages, items);
                         }
                         if (menus.selectedMenuItem == 3) {
 
                         }
                         drawMessages(player, messages);
-                        menus.createMenu(player.inventory, 'INVENTORY');
+                        menus.createMenu(player.getInventoryToDraw(), 'INVENTORY');
                         drawMenu(menus.getCurrentMenu());
                         gameState = 'INVENTORY';
                         break;
@@ -214,7 +214,8 @@ function initKeyListener() {
                     }
                     case "5":
                     case "Enter": {
-                        menus.selectedItem = player.inventory[menus.selectedMenuItem];
+                        menus.selectedItem = player.getSelectedItem(menus.selectedMenuItem);
+                        console.log(menus.selectedItem.name);
                         menus.createMenu([{ name: menus.selectedItem.verb }, { name: "Drop" }, { name: "Nothing" }], "What to do with this " + menus.selectedItem.name.toLowerCase() + "?");
                         drawMenu(menus.getCurrentMenu());
                         gameState = 'ITEM';
@@ -253,7 +254,7 @@ function initKeyListener() {
 
                     case "i":
                     case "I":
-                        menus.createMenu(player.inventory, 'INVENTORY');
+                        menus.createMenu(player.getInventoryToDraw(), 'INVENTORY');
                         drawMenu(menus.getCurrentMenu());
                         gameState = 'INVENTORY';
                         break;

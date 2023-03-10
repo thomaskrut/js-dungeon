@@ -40,9 +40,10 @@ function drawMessages(player, messages) {
     });
 
     messagesContext.fillStyle = "silver";
-    messagesContext.fillText("X: " + player.x + " | Y: " + player.y, g.VIEWPORT_WIDTH - 160, 20)
-    messagesContext.fillText("HP: " + player.hp, g.VIEWPORT_WIDTH - 160, 40)
-    messagesContext.fillText("Turns: " + player.turns, g.VIEWPORT_WIDTH - 160, 60)
+    messagesContext.fillText("X: " + player.x + " | Y: " + player.y, g.VIEWPORT_WIDTH - 170, 20)
+    messagesContext.fillText("HP: " + player.hp, g.VIEWPORT_WIDTH - 170, 40)
+    messagesContext.fillText("Turns: " + player.turns, g.VIEWPORT_WIDTH - 170, 60)
+    messagesContext.fillText("Lightsource: " + player.lightSource.name + "/" + player.lightSource.value, g.VIEWPORT_WIDTH - 170, 80)
 
 }
 

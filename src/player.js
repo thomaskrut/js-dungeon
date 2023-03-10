@@ -32,9 +32,7 @@ const player = {
         this.y = pos.y;
     },
 
-    moveTurn: function () {
-
-        this.turns++;
+    checkLightSource: function () {
         this.lightSource.value--;
 
         if (this.lightSource.value == 50) {
@@ -59,7 +57,18 @@ const player = {
             };
         };
 
+        if (this.lightSource.value < 0) this.lightSource.value = 0;
+    },
+
+    checkHp: function () {
         if (this.turns % 10 == 0 && this.hp < this.maxhp) this.hp++;
+    },
+
+    moveTurn: function () {
+
+        this.turns++;
+        this.checkLightSource();
+        this.checkHp();
 
     },
 

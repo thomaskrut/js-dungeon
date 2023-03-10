@@ -45,6 +45,30 @@
             "pickupAction": "addToInventory",
             "useAction": "lightTorch",
             "verb": "Light"
+        },
+        {
+            "name": "Knife",
+            "prefix": "a",
+            "char": "!",
+            "prob": 700,
+            "value": 10,
+            "minValue": 8,
+            "maxValue": 12,
+            "pickupAction": "addToInventory",
+            "useAction": "wieldWeapon",
+            "verb": "Wield"
+        },
+        {
+            "name": "Scroll",
+            "prefix": "a",
+            "char": "?",
+            "prob": 600,
+            "value": 0,
+            "minValue": 0,
+            "maxValue": 0,
+            "pickupAction": "addToInventory",
+            "useAction": "readScroll",
+            "verb": "Read"
         }
     ],
     "monsters": [
@@ -62,7 +86,7 @@
         {
             "name": "Slow moving fungus",
             "char": "F",
-            "prob": 100,
+            "prob": 900,
             "attack": ["clutches at", "breathes at", "touches"],
             "str": 2,
             "hp": 40,

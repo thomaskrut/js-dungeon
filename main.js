@@ -95,6 +95,8 @@ function checkForItems(player, items) {
 
 function movePlayer(command) {
 
+    let inCombat = false;
+
     if (command.length <= 2) {
         let modX = 0;
         let modY = 0;
@@ -109,8 +111,9 @@ function movePlayer(command) {
 
             monsters.forEach(monster => {
                 if (checkOverlap(nextPlayerPosition, monster)) {
-                    messages.addMessage("You hit the " + monster.name.toLowerCase())
-                    monster.hp -= player.str;
+                    inCombat = true;
+                    messages.addMessage("You hit the " + monster.name.toLowerCase() + " with your " + player.weapon.name.toLowerCase());
+                    monster.hp -= player.str + player.weapon.value;
                     if (monster.hp <= 0) {
                         messages.addMessage("You killed the " + monster.name.toLowerCase());
                         removeMonster(monsters, monster, grid, charMap);
@@ -122,7 +125,7 @@ function movePlayer(command) {
             player.turns++;
             moveMonsters(monsters, player, grid);
             updateMapView(player, grid);
-            checkForItems(player, items);
+            if(!inCombat) checkForItems(player, items);
         }
 
        

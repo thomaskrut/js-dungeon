@@ -9,6 +9,11 @@ const player = {
     str: 12,
     hunger: 0,
     turns: 0,
+    weapon: {
+        prefix: " ",
+        name: "fist",
+        value: 0
+    },
 
     inventory: [],
 
@@ -32,6 +37,11 @@ const player = {
 
     lightTorch: function (item, messages) {
 
+    },
+
+    wieldWeapon: function (item, messages) {
+        this.weapon = item;
+        messages.addMessage("You are now wielding " + item.prefix + " " + item.name.toLowerCase());
     },
 
     addToInventory: function (item, messages) {

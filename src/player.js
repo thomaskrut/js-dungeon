@@ -1,4 +1,7 @@
 export { player };
+import { setLitAreaSize } from "./grid.js";
+import { messages } from "./messages.js";
+import { getRandom } from "./util.js";
 
 const player = {
     x: 0,
@@ -6,6 +9,7 @@ const player = {
     speed: 10,
     gold: 0,
     hp: 30,
+    maxhp: 30,
     str: 12,
     hunger: 0,
     turns: 0,
@@ -13,6 +17,10 @@ const player = {
         prefix: " ",
         name: "fist",
         value: 0
+    },
+    lightSource: {
+        name: "Torch",
+        value: 700
     },
 
     inventory: [],
@@ -22,6 +30,37 @@ const player = {
     setPosition: function (pos) {
         this.x = pos.x;
         this.y = pos.y;
+    },
+
+    moveTurn: function () {
+
+        this.turns++;
+        this.lightSource.value--;
+
+        if (this.lightSource.value == 50) {
+            messages.addMessage("Your light is flickering!");
+        }
+
+        if (this.lightSource.value == 10) {
+            messages.addMessage("Your light is about to go out!");
+        }
+
+        if (this.lightSource.value < 50 && this.lightSource.value > 0) {
+            setLitAreaSize(1 + getRandom(4));
+        }
+
+        if (this.lightSource.value == 0) {
+            
+            messages.addMessage("Your light goes out!");
+            setLitAreaSize(2);
+            this.lightSource = {
+                name: "none",
+                value: 0
+            };
+        };
+
+        if (this.turns % 10 == 0 && this.hp < this.maxhp) this.hp++;
+
     },
 
     eatFood: function (item, messages) {
@@ -36,7 +75,15 @@ const player = {
     },
 
     lightTorch: function (item, messages) {
-
+        if (this.lightSource.name == 'none') {
+            setLitAreaSize(5);
+            this.lightSource = item;
+            this.removeFromInventory(item);
+            messages.addMessage("You lit the " + item.name.toLowerCase());
+        } else {
+            messages.addMessage("You are already using a lit " + this.lightSource.name.toLowerCase());
+        }
+        
     },
 
     wieldWeapon: function (item, messages) {

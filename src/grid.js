@@ -1,4 +1,4 @@
-export { createGridSection };
+export { createGridSection, setLitAreaSize };
 
 import { globals as g } from "./globals.js";
 import { checkOverlap } from "./util.js";
@@ -6,6 +6,10 @@ import { checkOverlap } from "./util.js";
 let litAreaSize = 5;
 
 const modCycle = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }, { x: 1, y: 1 }, { x: 1, y: -1 }, { x: -1, y: 1 }, { x: -1, y: -1 }];
+
+function setLitAreaSize(newSize) {
+    litAreaSize = newSize;
+}
 
 function createGridSection(elementsWide, elementsHigh, player, grid, charMap, items) {
 

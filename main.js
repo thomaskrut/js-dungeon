@@ -122,7 +122,7 @@ function movePlayer(command) {
                 }
             });
             player.setPosition(nextPlayerPosition);
-            player.turns++;
+            player.moveTurn();
             moveMonsters(monsters, player, grid);
             updateMapView(player, grid);
             if(!inCombat) checkForItems(player, items);
@@ -133,7 +133,7 @@ function movePlayer(command) {
     }
 
     if (command == 'rest') {
-        player.turns++;
+        player.moveTurn();
         moveMonsters(monsters, player, grid);
         updateMapView(player, grid);
     }
